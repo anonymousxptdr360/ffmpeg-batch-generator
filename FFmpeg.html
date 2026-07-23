@@ -2,108 +2,362 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Générateur de commande FFmpeg</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Générateur FFmpeg Ultimate</title>
   <style>
-    body { font-family: system-ui, sans-serif; background: #121212; color: #fff; max-width: 700px; margin: 40px auto; padding: 20px; }
-    .card { background: #1e1e1e; padding: 20px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
-    h2 { margin-top: 0; color: #3b82f6; }
-    label { display: block; margin-top: 15px; font-weight: bold; font-size: 0.9em; color: #aaa; }
-    input, select { width: 100%; padding: 10px; margin-top: 5px; background: #2a2a2a; color: #fff; border: 1px solid #444; border-radius: 6px; box-sizing: border-box; }
-    .row { display: flex; gap: 15px; }
-    .row > div { flex: 1; }
-    .output-box { margin-top: 25px; background: #000; padding: 15px; border-radius: 6px; position: relative; border: 1px solid #333; }
-    code { font-family: monospace; color: #10b981; word-break: break-all; white-space: pre-wrap; font-size: 0.95em; }
-    button { background: #3b82f6; color: white; border: none; padding: 10px 20px; margin-top: 15px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; }
-    button:hover { background: #2563eb; }
+    :root {
+      --bg-color: #0f172a; --card-bg: #1e293b; --accent: #3b82f6;
+      --accent-hover: #2563eb; --text-main: #f8fafc; --text-muted: #94a3b8;
+      --danger: #ef4444; --success: #10b981; --border: #334155;
+    }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg-color); color: var(--text-main); max-width: 850px; margin: 40px auto; padding: 20px; line-height: 1.5; }
+    .card { background: var(--card-bg); padding: 30px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid var(--border); }
+    h2 { margin-top: 0; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 15px; }
+    .section { margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+    .section:last-child { border-bottom: none; }
+    label { display: block; margin-top: 15px; font-weight: 600; font-size: 0.9em; color: var(--text-muted); margin-bottom: 5px; }
+    
+    input[type="text"], select { width: 100%; padding: 12px; background: #0f172a; color: #fff; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; font-size: 1em; }
+    input[type="text"]::placeholder { color: #475569; font-style: italic; }
+    
+    .row { display: flex; gap: 20px; flex-wrap: wrap; }
+    .row > div { flex: 1; min-width: 200px; }
+    .checkbox-group { display: flex; align-items: center; gap: 10px; margin-top: 15px; background: #0f172a; padding: 12px; border-radius: 8px; border: 1px solid var(--border); }
+    .checkbox-group input { width: 20px; height: 20px; accent-color: var(--accent); }
+    .checkbox-group label { margin: 0; color: var(--text-main); cursor: pointer; flex: 1; font-weight: normal;}
+    .output-box { margin-top: 20px; background: #000; padding: 20px; border-radius: 12px; border: 1px solid #333; position: relative; }
+    code { font-family: 'Consolas', monospace; color: var(--success); word-break: break-all; white-space: pre-wrap; font-size: 0.9em; display: block; min-height: 20px;}
+    button { background: var(--accent); color: white; border: none; padding: 14px 20px; margin-top: 20px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; font-size: 1.1em; transition: background 0.2s; }
+    button:hover { background: var(--accent-hover); }
+    .warning-text { color: var(--danger); font-size: 0.85em; font-weight: bold; }
+    .info-badge { display: inline-block; background: #3b82f644; color: #60a5fa; padding: 4px 8px; border-radius: 4px; font-size: 0.8em; margin-bottom: 10px; font-weight: bold; }
   </style>
 </head>
 <body>
 
 <div class="card">
-  <h2>⚡ Générateur FFmpeg pour dossier</h2>
+  <h2>⚡ FFmpeg Ultimate CLI</h2>
 
-  <label for="os">Système d'exploitation / Terminal :</label>
-  <select id="os" onchange="generate()">
-    <option value="cmd">Windows - Invite de commande (CMD)</option>
-    <option value="ps">Windows - PowerShell</option>
-    <option value="bash">Mac / Linux - Terminal (Bash/Zsh)</option>
-  </select>
-
-  <label for="path">Chemin du dossier :</label>
-  <input type="text" id="path" value="C:\Users\user\Desktop\youtube" oninput="generate()">
-
-  <div class="row">
-    <div>
-      <label for="codec">Codec vidéo :</label>
-      <select id="codec" onchange="generate()">
-        <option value="libx264">H.264 (Universel)</option>
-        <option value="libx265">H.265 / HEVC (Ultra léger)</option>
-      </select>
+  <div class="section">
+    <div class="row">
+      <div>
+        <label for="os">Système d'exploitation :</label>
+        <select id="os" onchange="generate()">
+          <option value="cmd">Windows - Script (.bat)</option>
+          <option value="ps">Windows - PowerShell</option>
+          <option value="bash">Mac / Linux - Terminal (Bash/Zsh)</option>
+        </select>
+      </div>
     </div>
-    <div>
-      <label for="crf">Qualité / Compression (CRF) :</label>
-      <select id="crf" onchange="generate()">
-        <option value="23">23 - Haute qualité (Fichier moyen)</option>
-        <option value="28" selected>28 - Équilibré (Recommandé)</option>
-        <option value="32">32 - Forte compression (Très léger)</option>
-      </select>
+    <div class="row">
+      <div>
+        <label for="path">Dossier Source :</label>
+        <input type="text" id="path" placeholder="C:\Users\nom\Desktop\Source" oninput="generate()">
+      </div>
+      <div>
+        <label for="dest">Dossier de Destination :</label>
+        <input type="text" id="dest" placeholder="D:\Dossier\Compresses" oninput="generate()">
+      </div>
     </div>
   </div>
 
-  <div class="row">
-    <div>
-      <label for="preset">Vitesse d'encodage :</label>
-      <select id="preset" onchange="generate()">
-        <option value="ultrafast">Ultra rapide (Moins optimisé)</option>
-        <option value="fast">Rapide</option>
-        <option value="slow" selected>Lent (Meilleure compression)</option>
-      </select>
+  <div class="section">
+    <label style="color:var(--accent);">🧠 Intelligence & Ordre</label>
+    <div class="row">
+      <div>
+        <label for="sortOrder">Ordre de traitement :</label>
+        <select id="sortOrder" onchange="generate()">
+          <option value="default">Normal (Alphabétique)</option>
+          <option value="oldest" selected>⏳ Du plus ANCIEN au plus RÉCENT (Garde la galerie ordonnée)</option>
+          <option value="newest">🆕 Du plus RÉCENT au plus ANCIEN</option>
+        </select>
+      </div>
     </div>
-    <div>
-      <label for="audio">Audio :</label>
-      <select id="audio" onchange="generate()">
-        <option value="-acodec copy">Conserver l'audio d'origine</option>
-        <option value="-c:a aac -b:a 128k">Compresser en AAC 128k</option>
-      </select>
+    <div class="checkbox-group">
+      <input type="checkbox" id="skipH265" checked onchange="generate()">
+      <label for="skipH265">Ne pas recompresser les vidéos déjà en H.265 <br><small style="color:var(--text-muted)">Utilise FFprobe pour analyser la source avant de lancer FFmpeg</small></label>
+    </div>
+    <div class="checkbox-group">
+      <input type="checkbox" id="skipDest" checked onchange="generate()">
+      <label for="skipDest">Ignorer si le fichier existe déjà dans la destination (-n)</label>
+    </div>
+    <div class="checkbox-group" style="border-color: rgba(239, 68, 68, 0.3);">
+      <input type="checkbox" id="deleteOrig" onchange="generate()">
+      <label for="deleteOrig">Supprimer l'original après succès <br><span class="warning-text">⚠️ Action irréversible</span></label>
+    </div>
+  </div>
+
+  <div class="section">
+    <label for="mediaType" style="color:var(--accent);">📁 Que voulez-vous traiter ?</label>
+    <select id="mediaType" onchange="updateUI()">
+      <option value="both">Vidéos ET Images</option>
+      <option value="video">Vidéos uniquement</option>
+      <option value="image">Images uniquement</option>
+    </select>
+  </div>
+
+  <div class="section" id="videoSection">
+    <label style="color:var(--accent);">🎬 Paramètres Vidéo</label>
+    <div class="row">
+      <div>
+        <label for="codec">Codec vidéo :</label>
+        <select id="codec" onchange="generate()">
+          <option value="libx265" selected>H.265 / HEVC (Ultra léger)</option>
+          <option value="libx264">H.264 (Compatibilité max)</option>
+        </select>
+      </div>
+      <div>
+        <label for="crf">Qualité Vidéo (CRF) :</label>
+        <select id="crf" onchange="generate()">
+          <option value="23">23 - Haute qualité</option>
+          <option value="28" selected>28 - Équilibré</option>
+          <option value="32">32 - Forte compression</option>
+        </select>
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label for="preset">Vitesse :</label>
+        <select id="preset" onchange="generate()">
+          <option value="medium">Moyen</option>
+          <option value="slow" selected>Lent (Meilleur poids)</option>
+        </select>
+      </div>
+      <div>
+        <label for="audio">Audio :</label>
+        <select id="audio" onchange="generate()">
+          <option value="-c:a copy">Conserver l'audio d'origine</option>
+          <option value="-c:a aac -b:a 128k">Compresser en AAC 128k</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" id="imageSection">
+    <label style="color:var(--accent);">📸 Paramètres Image</label>
+    <div class="row">
+      <div>
+        <label for="imgFormat">Format Image :</label>
+        <select id="imgFormat" onchange="generate()">
+          <option value="webp" selected>Convertir en WebP</option>
+          <option value="keep">Conserver le format (JPG/PNG)</option>
+        </select>
+      </div>
+      <div>
+        <label for="imgQuality">Qualité Image :</label>
+        <select id="imgQuality" onchange="generate()">
+          <option value="90">90 - Excellente</option>
+          <option value="80" selected>80 - Équilibré</option>
+          <option value="60">60 - Forte compression</option>
+        </select>
+      </div>
     </div>
   </div>
 
   <div class="output-box">
+    <div id="instructionBadge" class="info-badge">Collez ce code dans un fichier .bat</div>
     <code id="result">...</code>
-    <button onclick="copyCommand()">Copier la commande</button>
+    <button id="copyBtn" onclick="copyCommand()">Copier le code</button>
   </div>
 </div>
 
 <script>
+function updateUI() {
+  const type = document.getElementById('mediaType').value;
+  document.getElementById('videoSection').style.display = (type === 'both' || type === 'video') ? 'block' : 'none';
+  document.getElementById('imageSection').style.display = (type === 'both' || type === 'image') ? 'block' : 'none';
+  generate();
+}
+
 function generate() {
-  const os = document.getElementById('os').value;
-  let path = document.getElementById('path').value.trim();
-  const codec = document.getElementById('codec').value;
-  const crf = document.getElementById('crf').value;
-  const preset = document.getElementById('preset').value;
-  const audio = document.getElementById('audio').value;
+  try {
+    const os = document.getElementById('os').value;
+    const badge = document.getElementById('instructionBadge');
+    
+    let rawPath = document.getElementById('path').value.trim();
+    let rawDest = document.getElementById('dest').value.trim();
+    const path = rawPath || "C:\\Dossier\\Source";
+    const dest = rawDest || "D:\\Dossier\\Destination";
 
-  let cmd = "";
+    const mediaType = document.getElementById('mediaType').value;
+    const sortOrder = document.getElementById('sortOrder').value;
+    const skipDest = document.getElementById('skipDest').checked ? "-n" : "-y";
+    const skipH265 = document.getElementById('skipH265').checked;
+    const deleteOrig = document.getElementById('deleteOrig').checked;
 
-  if (os === "cmd") {
-    // Escape backslashes for path if needed
-    cmd = `cd /d "${path}" && for %i in (*.mp4 *.mov *.mkv) do ffmpeg -i "%i" -vcodec ${codec} -crf ${crf} -preset ${preset} ${audio} "compressed_%i"`;
-  } else if (os === "ps") {
-    cmd = `Set-Location "${path}"; Get-ChildItem *.mp4,*.mov,*.mkv | ForEach-Object { ffmpeg -i $_.FullName -vcodec ${codec} -crf ${crf} -preset ${preset} ${audio} "compressed_$($_.Name)" }`;
-  } else if (os === "bash") {
-    cmd = `cd "${path}" && for file in *.{mp4,mov,mkv}; do [ -f "$file" ] && ffmpeg -i "$file" -vcodec ${codec} -crf ${crf} -preset ${preset} ${audio} "compressed_$file"; done`;
+    const codec = document.getElementById('codec').value;
+    const crf = document.getElementById('crf').value;
+    const preset = document.getElementById('preset').value;
+    const audio = document.getElementById('audio').value;
+
+    const imgFormat = document.getElementById('imgFormat').value;
+    const imgQuality = document.getElementById('imgQuality').value;
+
+    let cmd = "";
+
+    if (os === "cmd") {
+      badge.textContent = "💾 À sauvegarder dans un fichier .bat et double-cliquer dessus";
+      badge.style.display = "inline-block";
+      
+      let vLoop = 'for %%i in (*.mp4 *.mov *.mkv) do (';
+      if (sortOrder === 'oldest') vLoop = 'for /f "delims=" %%i in (\'dir /b /a-d /od *.mp4 *.mov *.mkv 2^>nul\') do (';
+      if (sortOrder === 'newest') vLoop = 'for /f "delims=" %%i in (\'dir /b /a-d /o-d *.mp4 *.mov *.mkv 2^>nul\') do (';
+
+      let iLoop = 'for %%i in (*.jpg *.jpeg *.png) do (';
+      if (sortOrder === 'oldest') iLoop = 'for /f "delims=" %%i in (\'dir /b /a-d /od *.jpg *.jpeg *.png 2^>nul\') do (';
+      if (sortOrder === 'newest') iLoop = 'for /f "delims=" %%i in (\'dir /b /a-d /o-d *.jpg *.jpeg *.png 2^>nul\') do (';
+
+      cmd += '@echo off\n';
+      cmd += 'chcp 65001 >nul\n'; // Support des accents
+      cmd += 'cd /d "' + path + '"\n';
+      cmd += 'if not exist "' + dest + '" mkdir "' + dest + '"\n\n';
+
+      if (mediaType === "both" || mediaType === "video") {
+        let vidDel = deleteOrig ? ' && del "%%i"' : '';
+        cmd += 'echo ===================================\n';
+        cmd += 'echo      TRAITEMENT DES VIDEOS\n';
+        cmd += 'echo ===================================\n';
+        
+        if (skipH265) {
+          let action = 'ffmpeg ' + skipDest + ' -i "%%i" -c:v ' + codec + ' -crf ' + crf + ' -preset ' + preset + ' ' + audio + ' "' + dest + '\\%%~nxi"' + vidDel;
+          cmd += vLoop + '\n';
+          cmd += '    ffprobe -v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "%%i" | findstr /i "hevc" >nul || ' + action + '\n';
+          cmd += ')\n\n';
+        } else {
+          let action = 'ffmpeg ' + skipDest + ' -i "%%i" -c:v ' + codec + ' -crf ' + crf + ' -preset ' + preset + ' ' + audio + ' "' + dest + '\\%%~nxi"' + vidDel;
+          cmd += vLoop + '\n';
+          cmd += '    ' + action + '\n';
+          cmd += ')\n\n';
+        }
+      }
+
+      if (mediaType === "both" || mediaType === "image") {
+        let imgDel = deleteOrig ? ' && del "%%i"' : '';
+        cmd += 'echo ===================================\n';
+        cmd += 'echo      TRAITEMENT DES IMAGES\n';
+        cmd += 'echo ===================================\n';
+        
+        if (imgFormat === "webp") {
+          let action = 'ffmpeg ' + skipDest + ' -i "%%i" -c:v libwebp -q:v ' + imgQuality + ' "' + dest + '\\%%~ni.webp"' + imgDel;
+          cmd += iLoop + '\n';
+          cmd += '    ' + action + '\n';
+          cmd += ')\n\n';
+        } else {
+          let action = 'ffmpeg ' + skipDest + ' -i "%%i" -qscale:v 5 "' + dest + '\\%%~nxi"' + imgDel;
+          cmd += iLoop + '\n';
+          cmd += '    ' + action + '\n';
+          cmd += ')\n\n';
+        }
+      }
+      
+      cmd += 'echo.\n';
+      cmd += 'echo ---------------- Termine ! ----------------\n';
+      cmd += 'pause\n';
+
+    } else if (os === "ps") {
+      badge.textContent = "📟 À coller directement dans le terminal PowerShell";
+      badge.style.display = "inline-block";
+      
+      let psSort = '';
+      if (sortOrder === 'oldest') psSort = ' | Sort-Object LastWriteTime';
+      if (sortOrder === 'newest') psSort = ' | Sort-Object LastWriteTime -Descending';
+
+      cmd += 'Set-Location "' + path + '"\n';
+      cmd += 'if (!(Test-Path "' + dest + '")) { New-Item -ItemType Directory -Force -Path "' + dest + '" | Out-Null }\n';
+
+      if (mediaType === "both" || mediaType === "video") {
+        let vidDel = deleteOrig ? '; if ($?) { Remove-Item $_.FullName }' : '';
+        if (skipH265) {
+          cmd += 'Get-ChildItem *.mp4,*.mov,*.mkv' + psSort + ' | ForEach-Object { $c = ffprobe -v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 $_.FullName; if ($c -notmatch "hevc") { ffmpeg ' + skipDest + ' -i $_.FullName -c:v ' + codec + ' -crf ' + crf + ' -preset ' + preset + ' ' + audio + ' "' + dest + '\\$($_.Name)"' + vidDel + ' } }\n';
+        } else {
+          cmd += 'Get-ChildItem *.mp4,*.mov,*.mkv' + psSort + ' | ForEach-Object { ffmpeg ' + skipDest + ' -i $_.FullName -c:v ' + codec + ' -crf ' + crf + ' -preset ' + preset + ' ' + audio + ' "' + dest + '\\$($_.Name)"' + vidDel + ' }\n';
+        }
+      }
+
+      if (mediaType === "both" || mediaType === "image") {
+        let imgDel = deleteOrig ? '; if ($?) { Remove-Item $_.FullName }' : '';
+        if (imgFormat === "webp") {
+          cmd += 'Get-ChildItem *.jpg,*.jpeg,*.png' + psSort + ' | ForEach-Object { ffmpeg ' + skipDest + ' -i $_.FullName -c:v libwebp -q:v ' + imgQuality + ' "' + dest + '\\$($_.BaseName).webp"' + imgDel + ' }\n';
+        } else {
+          cmd += 'Get-ChildItem *.jpg,*.jpeg,*.png' + psSort + ' | ForEach-Object { ffmpeg ' + skipDest + ' -i $_.FullName -qscale:v 5 "' + dest + '\\$($_.Name)"' + imgDel + ' }\n';
+        }
+      }
+
+    } else if (os === "bash") {
+      badge.textContent = "🐧 À coller directement dans le Terminal (Bash/Zsh)";
+      badge.style.display = "inline-block";
+      
+      let bVidLoop = 'for file in *.{mp4,mov,mkv}; do [ -f "$file" ] && ';
+      if (sortOrder === 'oldest') bVidLoop = 'ls -1tr *.{mp4,mov,mkv} 2>/dev/null | while IFS= read -r file; do ';
+      if (sortOrder === 'newest') bVidLoop = 'ls -1t *.{mp4,mov,mkv} 2>/dev/null | while IFS= read -r file; do ';
+
+      let bImgLoop = 'for file in *.{jpg,jpeg,png}; do [ -f "$file" ] && ';
+      if (sortOrder === 'oldest') bImgLoop = 'ls -1tr *.{jpg,jpeg,png} 2>/dev/null | while IFS= read -r file; do ';
+      if (sortOrder === 'newest') bImgLoop = 'ls -1t *.{jpg,jpeg,png} 2>/dev/null | while IFS= read -r file; do ';
+
+      cmd += 'cd "' + path + '"\n';
+      cmd += 'mkdir -p "' + dest + '"\n';
+
+      if (mediaType === "both" || mediaType === "video") {
+        let vidDel = deleteOrig ? ' && rm "$file"' : '';
+        if (skipH265) {
+          cmd += bVidLoop + '{ ffprobe -v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "$file" | grep -iq "hevc" || { ffmpeg ' + skipDest + ' -i "$file" -c:v ' + codec + ' -crf ' + crf + ' -preset ' + preset + ' ' + audio + ' "' + dest + '/$file"' + vidDel + '; }; }; done\n';
+        } else {
+          cmd += bVidLoop + '{ ffmpeg ' + skipDest + ' -i "$file" -c:v ' + codec + ' -crf ' + crf + ' -preset ' + preset + ' ' + audio + ' "' + dest + '/$file"' + vidDel + '; }; done\n';
+        }
+      }
+
+      if (mediaType === "both" || mediaType === "image") {
+        let imgDel = deleteOrig ? ' && rm "$file"' : '';
+        if (imgFormat === "webp") {
+          cmd += bImgLoop + '{ ffmpeg ' + skipDest + ' -i "$file" -c:v libwebp -q:v ' + imgQuality + ' "' + dest + '/${file%.*}.webp"' + imgDel + '; }; done\n';
+        } else {
+          cmd += bImgLoop + '{ ffmpeg ' + skipDest + ' -i "$file" -qscale:v 5 "' + dest + '/$file"' + imgDel + '; }; done\n';
+        }
+      }
+    }
+
+    document.getElementById('result').textContent = cmd.trim();
+  } catch (error) {
+    document.getElementById('result').textContent = "Erreur de génération : " + error.message;
   }
-
-  document.getElementById('result').textContent = cmd;
 }
 
 function copyCommand() {
-  const text = document.getElementById('result').textContent;
-  navigator.clipboard.writeText(text);
-  alert("Commande copiée dans le presse-papier !");
+  const textToCopy = document.getElementById('result').textContent;
+  const btn = document.getElementById('copyBtn');
+  
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(textToCopy).then(showSuccess);
+  } else {
+    let textArea = document.createElement("textarea");
+    textArea.value = textToCopy;
+    textArea.style.position = "fixed";
+    textArea.style.left = "-999999px";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+      document.execCommand('copy');
+      showSuccess();
+    } catch (err) {
+      alert("Appuyez sur Ctrl+C pour copier le texte");
+    }
+    document.body.removeChild(textArea);
+  }
+
+  function showSuccess() {
+    btn.textContent = "✅ Copié !";
+    btn.style.background = "#10b981";
+    setTimeout(() => { 
+      btn.textContent = "Copier le code"; 
+      btn.style.background = "var(--accent)"; 
+    }, 2000);
+  }
 }
 
-generate();
+// Initialisation au chargement de la page
+updateUI();
 </script>
 
 </body>
