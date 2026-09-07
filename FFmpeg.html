@@ -3,14 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Générateur FFmpeg Ultimate</title>
+  <title>Générateur FFmpeg Ultimate V3</title>
   <style>
     :root {
       --bg-color: #0f172a; --card-bg: #1e293b; --accent: #3b82f6;
       --accent-hover: #2563eb; --text-main: #f8fafc; --text-muted: #94a3b8;
       --danger: #ef4444; --success: #10b981; --border: #334155;
+      --info-bg: rgba(59, 130, 246, 0.1);
     }
-    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg-color); color: var(--text-main); max-width: 850px; margin: 40px auto; padding: 20px; line-height: 1.5; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg-color); color: var(--text-main); max-width: 950px; margin: 40px auto; padding: 20px; line-height: 1.5; }
     .card { background: var(--card-bg); padding: 30px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid var(--border); }
     h2 { margin-top: 0; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 15px; }
     .section { margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
@@ -21,32 +22,43 @@
     input[type="text"]::placeholder { color: #475569; font-style: italic; }
     
     .row { display: flex; gap: 20px; flex-wrap: wrap; }
-    .row > div { flex: 1; min-width: 200px; }
+    .row > div { flex: 1; min-width: 250px; display: flex; flex-direction: column; }
     .checkbox-group { display: flex; align-items: center; gap: 10px; margin-top: 15px; background: #0f172a; padding: 12px; border-radius: 8px; border: 1px solid var(--border); }
-    .checkbox-group input { width: 20px; height: 20px; accent-color: var(--accent); }
+    .checkbox-group input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--accent); flex-shrink: 0; }
     .checkbox-group label { margin: 0; color: var(--text-main); cursor: pointer; flex: 1; font-weight: normal;}
+    
+    .ext-selector { display: flex; gap: 15px; flex-wrap: wrap; background: #0f172a; padding: 12px; border-radius: 8px; border: 1px solid var(--border); margin-top: 5px; }
+    .ext-selector label { margin: 0; display: flex; align-items: center; gap: 5px; color: var(--text-main); cursor: pointer; font-weight: normal; font-size: 0.9em; }
+    
     .output-box { margin-top: 20px; background: #000; padding: 20px; border-radius: 12px; border: 1px solid #333; position: relative; }
     code { font-family: 'Consolas', monospace; color: var(--success); word-break: break-all; white-space: pre-wrap; font-size: 0.9em; display: block; min-height: 20px;}
     button { background: var(--accent); color: white; border: none; padding: 14px 20px; margin-top: 20px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; font-size: 1.1em; transition: background 0.2s; }
     button:hover { background: var(--accent-hover); }
     .warning-text { color: var(--danger); font-size: 0.85em; font-weight: bold; }
+    .success-text { color: var(--success); font-weight: bold; }
     .info-badge { display: inline-block; background: #3b82f644; color: #60a5fa; padding: 4px 8px; border-radius: 4px; font-size: 0.8em; margin-bottom: 10px; font-weight: bold; }
+    
+    .help-text { font-size: 0.85em; color: var(--text-muted); margin-top: 8px; background: var(--info-bg); padding: 10px 12px; border-left: 3px solid var(--accent); border-radius: 4px; flex-grow: 1; }
+    .help-text strong { color: var(--text-main); }
   </style>
 </head>
 <body>
 
 <div class="card">
-  <h2>⚡ FFmpeg Ultimate CLI</h2>
+  <h2>⚡ FFmpeg Ultimate CLI V3</h2>
 
   <div class="section">
     <div class="row">
       <div>
         <label for="os">Système d'exploitation :</label>
         <select id="os" onchange="generate()">
+          <option value="ps">Windows - PowerShell (Recommandé)</option>
           <option value="cmd">Windows - Script (.bat)</option>
-          <option value="ps">Windows - PowerShell</option>
           <option value="bash">Mac / Linux - Terminal (Bash/Zsh)</option>
         </select>
+        <div class="help-text">
+          <strong>PowerShell</strong> est recommandé car il gère nativement les dates de création/modification, les chemins longs, et les caractères spéciaux.
+        </div>
       </div>
     </div>
     <div class="row">
@@ -68,14 +80,21 @@
         <label for="sortOrder">Ordre de traitement :</label>
         <select id="sortOrder" onchange="generate()">
           <option value="default">Normal (Alphabétique)</option>
-          <option value="oldest" selected>⏳ Du plus ANCIEN au plus RÉCENT (Garde la galerie ordonnée)</option>
+          <option value="oldest" selected>⏳ Du plus ANCIEN au plus RÉCENT</option>
           <option value="newest">🆕 Du plus RÉCENT au plus ANCIEN</option>
         </select>
+        <div class="help-text">
+          <strong>Le plus ancien d'abord</strong> préserve l'ordre chronologique naturel de ta galerie photo/vidéo, ce qui est idéal pour un traitement en masse.
+        </div>
       </div>
     </div>
     <div class="checkbox-group">
+      <input type="checkbox" id="syncDate" checked onchange="generate()">
+      <label for="syncDate">Conserver les dates d'origine<br><small style="color:var(--text-muted)">Clone la date de création/modification + préserve les données EXIF des photos</small></label>
+    </div>
+    <div class="checkbox-group">
       <input type="checkbox" id="skipH265" checked onchange="generate()">
-      <label for="skipH265">Ne pas recompresser les vidéos déjà en H.265 <br><small style="color:var(--text-muted)">Utilise FFprobe pour analyser la source avant de lancer FFmpeg</small></label>
+      <label for="skipH265">Ne pas recompresser les vidéos déjà en H.265/HEVC<br><small style="color:var(--text-muted)">Utilise FFprobe pour analyser. Les fichiers optimisés sont simplement copiés.</small></label>
     </div>
     <div class="checkbox-group">
       <input type="checkbox" id="skipDest" checked onchange="generate()">
@@ -83,79 +102,151 @@
     </div>
     <div class="checkbox-group" style="border-color: rgba(239, 68, 68, 0.3);">
       <input type="checkbox" id="deleteOrig" onchange="generate()">
-      <label for="deleteOrig">Supprimer l'original après succès <br><span class="warning-text">⚠️ Action irréversible</span></label>
+      <label for="deleteOrig">Supprimer l'original après succès<br><span class="warning-text">⚠️ Action irréversible</span></label>
+    </div>
+    <div class="checkbox-group" style="border-color: rgba(16, 185, 129, 0.3);">
+      <input type="checkbox" id="copyOtherFiles" checked onchange="generate()">
+      <label for="copyOtherFiles">Copier aussi les fichiers non sélectionnés<br><small style="color:var(--text-muted)">Les fichiers qui ne sont pas dans les extensions cochées seront simplement copiés tels quels dans la destination.</small></label>
     </div>
   </div>
 
   <div class="section">
-    <label for="mediaType" style="color:var(--accent);">📁 Que voulez-vous traiter ?</label>
+    <label for="mediaType" style="color:var(--accent);">📁 Type de médias à traiter</label>
     <select id="mediaType" onchange="updateUI()">
       <option value="both">Vidéos ET Images</option>
       <option value="video">Vidéos uniquement</option>
       <option value="image">Images uniquement</option>
     </select>
+    
+    <div id="videoInputSection" style="margin-top: 15px;">
+      <label>Extensions Vidéo à analyser :</label>
+      <div class="ext-selector">
+        <label><input type="checkbox" class="vid-ext" value="mp4" checked onchange="generate()"> .MP4</label>
+        <label><input type="checkbox" class="vid-ext" value="mov" checked onchange="generate()"> .MOV</label>
+        <label><input type="checkbox" class="vid-ext" value="mkv" checked onchange="generate()"> .MKV</label>
+        <label><input type="checkbox" class="vid-ext" value="avi" onchange="generate()"> .AVI</label>
+        <label><input type="checkbox" class="vid-ext" value="wmv" onchange="generate()"> .WMV</label>
+      </div>
+      <div class="help-text">
+        <strong>Coche uniquement les formats présents</strong> dans ton dossier source. Les formats non cochés seront simplement copiés si l'option ci-dessus est activée.
+      </div>
+    </div>
+
+    <div id="imageInputSection" style="margin-top: 15px;">
+      <label>Extensions Image à analyser :</label>
+      <div class="ext-selector">
+        <label><input type="checkbox" class="img-ext" value="jpg" checked onchange="generate()"> .JPG/.JPEG</label>
+        <label><input type="checkbox" class="img-ext" value="png" checked onchange="generate()"> .PNG</label>
+        <label><input type="checkbox" class="img-ext" value="webp" onchange="generate()"> .WebP</label>
+        <label><input type="checkbox" class="img-ext" value="heic" onchange="generate()"> .HEIC (iPhone)</label>
+      </div>
+      <div class="help-text">
+        <strong>HEIC désactivé par défaut</strong> : Convertir un HEIC lui fait perdre ses données "Live Photo" et ses calques de profondeur. Active-le uniquement pour les images statiques.
+      </div>
+    </div>
   </div>
 
   <div class="section" id="videoSection">
-    <label style="color:var(--accent);">🎬 Paramètres Vidéo</label>
+    <label style="color:var(--accent);">🎬 Paramètres Vidéo (Format de sortie)</label>
     <div class="row">
       <div>
-        <label for="codec">Codec vidéo :</label>
+        <label for="codec">Codec vidéo cible :</label>
         <select id="codec" onchange="generate()">
           <option value="libx265" selected>H.265 / HEVC (Ultra léger)</option>
-          <option value="libx264">H.264 (Compatibilité max)</option>
+          <option value="libx264">H.264 (Compatibilité maximale)</option>
         </select>
+        <div class="help-text">
+          <strong>H.265</strong> compresse ~50% mieux que H.264 à qualité égale. Idéal pour l'archivage.<br>
+          <strong>H.264</strong> : Choisis-le si tu dois lire les vidéos sur de vieux appareils (TV, lecteur DVD, etc.).
+        </div>
       </div>
       <div>
         <label for="crf">Qualité Vidéo (CRF) :</label>
         <select id="crf" onchange="generate()">
+          <option value="20">20 - Qualité quasi lossless (Fichier lourd)</option>
           <option value="23">23 - Haute qualité</option>
-          <option value="28" selected>28 - Équilibré</option>
-          <option value="32">32 - Forte compression</option>
+          <option value="28" selected>28 - Équilibré (Idéal H.265)</option>
+          <option value="32">32 - Forte compression (Fichiers légers)</option>
         </select>
+        <div class="help-text">
+          <strong>Plus le CRF est bas, meilleure est la qualité</strong>.<br>
+          <strong>28</strong> est le sweet spot pour H.265 (équivalent visuel à CRF 23 en H.264).
+        </div>
       </div>
     </div>
     <div class="row">
       <div>
-        <label for="preset">Vitesse :</label>
+        <label for="preset">Vitesse d'encodage :</label>
         <select id="preset" onchange="generate()">
-          <option value="medium">Moyen</option>
-          <option value="slow" selected>Lent (Meilleur poids)</option>
+          <option value="medium">Moyen (Plus rapide)</option>
+          <option value="slow" selected>Lent (Meilleur ratio poids/qualité)</option>
+          <option value="veryslow">Très lent (Compression maximale)</option>
         </select>
+        <div class="help-text">
+          <strong>Lent</strong> prend plus de temps mais produit un fichier plus petit à qualité identique.<br>
+          <strong>Très lent</strong> : À utiliser uniquement pour l'archivage définitif (très long).
+        </div>
       </div>
       <div>
-        <label for="audio">Audio :</label>
+        <label for="audio">Gestion de l'audio :</label>
         <select id="audio" onchange="generate()">
-          <option value="-c:a copy">Conserver l'audio d'origine</option>
-          <option value="-c:a aac -b:a 128k">Compresser en AAC 128k</option>
+          <option value="-c:a copy">Conserver l'audio d'origine (Sans perte)</option>
+          <option value="-c:a aac -b:a 128k">Recompresser en AAC 128k</option>
+          <option value="-an">Supprimer l'audio</option>
         </select>
+        <div class="help-text">
+          <strong>Copier</strong> est plus rapide et préserve la qualité exacte. L'audio ne prend généralement pas beaucoup de place.
+        </div>
       </div>
     </div>
   </div>
 
   <div class="section" id="imageSection">
-    <label style="color:var(--accent);">📸 Paramètres Image</label>
+    <label style="color:var(--accent);">📸 Paramètres Image (Format de sortie)</label>
     <div class="row">
       <div>
-        <label for="imgFormat">Format Image :</label>
+        <label for="imgFormat">Format Image Cible :</label>
         <select id="imgFormat" onchange="generate()">
-          <option value="webp" selected>Convertir en WebP</option>
-          <option value="keep">Conserver le format (JPG/PNG)</option>
+          <option value="avif" selected>Convertir en AVIF (Compression maximale)</option>
+          <option value="webp">Convertir en WebP</option>
+          <option value="keep">Conserver le format source (JPG/PNG)</option>
         </select>
+        <div class="help-text">
+          <strong>AVIF</strong> : Compression ~20% meilleure que WebP à qualité égale. C'est le futur standard, supporté par tous les navigateurs modernes.<br>
+          <strong>WebP</strong> : Excellent compromis, compatible quasi partout.<br>
+          <strong>Garder le format</strong> : Utile si tu veux juste réduire la qualité/poids sans changer l'extension.
+        </div>
       </div>
       <div>
         <label for="imgQuality">Qualité Image :</label>
         <select id="imgQuality" onchange="generate()">
-          <option value="90">90 - Excellente</option>
-          <option value="80" selected>80 - Équilibré</option>
-          <option value="60">60 - Forte compression</option>
+          <option value="20">AVIF 20 / WebP 90 - Excellente (Fichiers plus gros)</option>
+          <option value="30" selected>AVIF 30 / WebP 80 - Équilibré</option>
+          <option value="40">AVIF 40 / WebP 60 - Forte compression (Fichiers très légers)</option>
         </select>
+        <div class="help-text">
+          <strong>AVIF 30</strong> est l'équivalent visuel de JPG qualité 85 ou WebP 80.<br>
+          <strong>Note :</strong> L'encodage AVIF est plus gourmand en CPU que WebP.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <label style="color:var(--accent);">⚙️ Mode Secours (Si FFmpeg n'est pas reconnu)</label>
+    <div class="row">
+      <div>
+        <label for="customFfmpeg">Chemin exact de ffmpeg.exe (optionnel) :</label>
+        <input type="text" id="customFfmpeg" placeholder="Laisser vide pour détection automatique (ex: C:\ffmpeg\bin\ffmpeg.exe)" oninput="generate()">
+        <div class="help-text">
+          Laisse vide en général. Le script essaiera de trouver FFmpeg automatiquement dans le PATH ou via Winget.
+        </div>
       </div>
     </div>
   </div>
 
   <div class="output-box">
-    <div id="instructionBadge" class="info-badge">Collez ce code dans un fichier .bat</div>
+    <div id="instructionBadge" class="info-badge">Collez ce code dans le terminal</div>
     <code id="result">...</code>
     <button id="copyBtn" onclick="copyCommand()">Copier le code</button>
   </div>
@@ -164,15 +255,40 @@
 <script>
 function updateUI() {
   const type = document.getElementById('mediaType').value;
-  document.getElementById('videoSection').style.display = (type === 'both' || type === 'video') ? 'block' : 'none';
-  document.getElementById('imageSection').style.display = (type === 'both' || type === 'image') ? 'block' : 'none';
+  const videoSection = document.getElementById('videoSection');
+  const videoInput = document.getElementById('videoInputSection');
+  const imageSection = document.getElementById('imageSection');
+  const imageInput = document.getElementById('imageInputSection');
+  
+  if (type === 'both' || type === 'video') {
+    videoSection.style.display = 'block';
+    videoInput.style.display = 'block';
+  } else {
+    videoSection.style.display = 'none';
+    videoInput.style.display = 'none';
+  }
+  
+  if (type === 'both' || type === 'image') {
+    imageSection.style.display = 'block';
+    imageInput.style.display = 'block';
+  } else {
+    imageSection.style.display = 'none';
+    imageInput.style.display = 'none';
+  }
+  
   generate();
+}
+
+function getSelectedExtensions(className) {
+  const checkboxes = document.querySelectorAll('.' + className + ':checked');
+  return Array.from(checkboxes).map(cb => cb.value);
 }
 
 function generate() {
   try {
     const os = document.getElementById('os').value;
     const badge = document.getElementById('instructionBadge');
+    const resultEl = document.getElementById('result');
     
     let rawPath = document.getElementById('path').value.trim();
     let rawDest = document.getElementById('dest').value.trim();
@@ -184,6 +300,8 @@ function generate() {
     const skipDest = document.getElementById('skipDest').checked ? "-n" : "-y";
     const skipH265 = document.getElementById('skipH265').checked;
     const deleteOrig = document.getElementById('deleteOrig').checked;
+    const syncDate = document.getElementById('syncDate').checked;
+    const copyOtherFiles = document.getElementById('copyOtherFiles').checked;
 
     const codec = document.getElementById('codec').value;
     const crf = document.getElementById('crf').value;
@@ -191,141 +309,420 @@ function generate() {
     const audio = document.getElementById('audio').value;
 
     const imgFormat = document.getElementById('imgFormat').value;
-    const imgQuality = document.getElementById('imgQuality').value;
+    const rawImgQuality = document.getElementById('imgQuality').value;
+    
+    const avifCrf = rawImgQuality;
+    const webpQ = rawImgQuality === "20" ? "90" : (rawImgQuality === "30" ? "80" : "60");
+
+    const customFfmpeg = document.getElementById('customFfmpeg').value.trim();
+
+    const vidExts = getSelectedExtensions('vid-ext');
+    const imgExts = getSelectedExtensions('img-ext');
+    
+    let hasVid = (mediaType === 'both' || mediaType === 'video') && vidExts.length > 0;
+    let hasImg = (mediaType === 'both' || mediaType === 'image') && imgExts.length > 0;
+    
+    if (!hasVid && !hasImg && !copyOtherFiles) {
+      badge.textContent = "⚠️ Aucune extension sélectionnée";
+      resultEl.textContent = "⚠️ Veuillez cocher au moins une extension vidéo ou image pour générer le code.";
+      return;
+    }
 
     let cmd = "";
+    const mapMetadata = syncDate ? "-map_metadata 0" : "";
 
-    if (os === "cmd") {
-      badge.textContent = "💾 À sauvegarder dans un fichier .bat et double-cliquer dessus";
-      badge.style.display = "inline-block";
-      
-      let vLoop = 'for %%i in (*.mp4 *.mov *.mkv) do (';
-      if (sortOrder === 'oldest') vLoop = 'for /f "delims=" %%i in (\'dir /b /a-d /od *.mp4 *.mov *.mkv 2^>nul\') do (';
-      if (sortOrder === 'newest') vLoop = 'for /f "delims=" %%i in (\'dir /b /a-d /o-d *.mp4 *.mov *.mkv 2^>nul\') do (';
-
-      let iLoop = 'for %%i in (*.jpg *.jpeg *.png) do (';
-      if (sortOrder === 'oldest') iLoop = 'for /f "delims=" %%i in (\'dir /b /a-d /od *.jpg *.jpeg *.png 2^>nul\') do (';
-      if (sortOrder === 'newest') iLoop = 'for /f "delims=" %%i in (\'dir /b /a-d /o-d *.jpg *.jpeg *.png 2^>nul\') do (';
-
-      cmd += '@echo off\n';
-      cmd += 'chcp 65001 >nul\n'; // Support des accents
-      cmd += 'cd /d "' + path + '"\n';
-      cmd += 'if not exist "' + dest + '" mkdir "' + dest + '"\n\n';
-
-      if (mediaType === "both" || mediaType === "video") {
-        let vidDel = deleteOrig ? ' && del "%%i"' : '';
-        cmd += 'echo ===================================\n';
-        cmd += 'echo      TRAITEMENT DES VIDEOS\n';
-        cmd += 'echo ===================================\n';
-        
-        if (skipH265) {
-          let action = 'ffmpeg ' + skipDest + ' -i "%%i" -c:v ' + codec + ' -crf ' + crf + ' -preset ' + preset + ' ' + audio + ' "' + dest + '\\%%~nxi"' + vidDel;
-          cmd += vLoop + '\n';
-          cmd += '    ffprobe -v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "%%i" | findstr /i "hevc" >nul || ' + action + '\n';
-          cmd += ')\n\n';
-        } else {
-          let action = 'ffmpeg ' + skipDest + ' -i "%%i" -c:v ' + codec + ' -crf ' + crf + ' -preset ' + preset + ' ' + audio + ' "' + dest + '\\%%~nxi"' + vidDel;
-          cmd += vLoop + '\n';
-          cmd += '    ' + action + '\n';
-          cmd += ')\n\n';
-        }
-      }
-
-      if (mediaType === "both" || mediaType === "image") {
-        let imgDel = deleteOrig ? ' && del "%%i"' : '';
-        cmd += 'echo ===================================\n';
-        cmd += 'echo      TRAITEMENT DES IMAGES\n';
-        cmd += 'echo ===================================\n';
-        
-        if (imgFormat === "webp") {
-          let action = 'ffmpeg ' + skipDest + ' -i "%%i" -c:v libwebp -q:v ' + imgQuality + ' "' + dest + '\\%%~ni.webp"' + imgDel;
-          cmd += iLoop + '\n';
-          cmd += '    ' + action + '\n';
-          cmd += ')\n\n';
-        } else {
-          let action = 'ffmpeg ' + skipDest + ' -i "%%i" -qscale:v 5 "' + dest + '\\%%~nxi"' + imgDel;
-          cmd += iLoop + '\n';
-          cmd += '    ' + action + '\n';
-          cmd += ')\n\n';
-        }
-      }
-      
-      cmd += 'echo.\n';
-      cmd += 'echo ---------------- Termine ! ----------------\n';
-      cmd += 'pause\n';
-
-    } else if (os === "ps") {
+    if (os === "ps") {
       badge.textContent = "📟 À coller directement dans le terminal PowerShell";
       badge.style.display = "inline-block";
+      
+      cmd += 'Set-Location "' + path + '"\n';
+      cmd += 'if (!(Test-Path "' + dest + '")) { New-Item -ItemType Directory -Force -Path "' + dest + '" | Out-Null }\n\n';
+
+      // Détection FFmpeg
+      if (!customFfmpeg) {
+        cmd += '# Détection automatique de FFmpeg\n';
+        cmd += '$ffmpegCmd = Get-Command ffmpeg -ErrorAction SilentlyContinue\n';
+        cmd += 'if (-not $ffmpegCmd) {\n';
+        cmd += '    Write-Host "[INFO] FFmpeg introuvable dans le PATH. Recherche via Winget..." -ForegroundColor Yellow\n';
+        cmd += '    $wingetPaths = @(\n';
+        cmd += '        "$env:LOCALAPPDATA\\Microsoft\\WinGet\\Links\\ffmpeg.exe",\n';
+        cmd += '        "$env:LOCALAPPDATA\\Microsoft\\WinGet\\Packages\\Gyan.FFmpeg_Microsoft\\ffmpeg-*\\bin\\ffmpeg.exe"\n';
+        cmd += '    )\n';
+        cmd += '    $found = $false\n';
+        cmd += '    foreach ($p in $wingetPaths) {\n';
+        cmd += '        if (Test-Path $p) {\n';
+        cmd += '            $ffmpegCmd = $p\n';
+        cmd += '            $found = $true\n';
+        cmd += '            break\n';
+        cmd += '        }\n';
+        cmd += '    }\n';
+        cmd += '    if (-not $found) {\n';
+        cmd += '        $wingetFfmpeg = Get-ChildItem -Path "$env:LOCALAPPDATA\\Microsoft\\WinGet\\Packages" -Filter "ffmpeg.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1\n';
+        cmd += '        if ($wingetFfmpeg) {\n';
+        cmd += '            $ffmpegCmd = $wingetFfmpeg.FullName\n';
+        cmd += '        }\n';
+        cmd += '    }\n';
+        cmd += '}\n\n';
+        cmd += 'if (-not $ffmpegCmd -or -not (Test-Path $ffmpegCmd)) {\n';
+        cmd += '    Write-Host "[ERREUR] FFmpeg introuvable. Installez-le avec: winget install Gyan.FFmpeg" -ForegroundColor Red\n';
+        cmd += '    Write-Host "Puis redémarrez PowerShell ou utilisez le Mode Secours." -ForegroundColor Yellow\n';
+        cmd += '    exit\n';
+        cmd += '}\n\n';
+        cmd += '$ffprobeCmd = $ffmpegCmd -replace "ffmpeg\\.exe$", "ffprobe.exe"\n';
+        cmd += 'Write-Host "[INFO] FFmpeg trouvé: $ffmpegCmd" -ForegroundColor Green\n\n';
+      } else {
+        cmd += '$ffmpegCmd = "' + customFfmpeg + '"\n';
+        cmd += '$ffprobeCmd = "' + customFfmpeg.replace(/ffmpeg\.exe/i, 'ffprobe.exe') + '"\n\n';
+      }
+
+      // Construction des filtres
+      let allFilters = [];
+      if (hasVid) allFilters.push(...vidExts.map(ext => '*.' + ext));
+      if (hasImg) {
+        allFilters.push(...imgExts.map(ext => '*.' + ext));
+        if (imgExts.includes('jpg') && !imgExts.includes('jpeg')) {
+          allFilters.push('*.jpeg');
+        }
+      }
       
       let psSort = '';
       if (sortOrder === 'oldest') psSort = ' | Sort-Object LastWriteTime';
       if (sortOrder === 'newest') psSort = ' | Sort-Object LastWriteTime -Descending';
 
-      cmd += 'Set-Location "' + path + '"\n';
-      cmd += 'if (!(Test-Path "' + dest + '")) { New-Item -ItemType Directory -Force -Path "' + dest + '" | Out-Null }\n';
+      // Traitement unifié (vidéos + images triés ensemble par date)
+      if (allFilters.length > 0) {
+        cmd += '# Traitement des fichiers sélectionnés (triés par date)\n';
+        cmd += '$selectedFiles = Get-ChildItem -Include ' + allFilters.join(',') + ' -Depth 0' + psSort + '\n';
+        cmd += 'Write-Host "=== TRAITEMENT DE " $selectedFiles.Count " FICHIERS SELECTIONNES ===" -ForegroundColor Cyan\n\n';
+        
+        cmd += 'foreach ($file in $selectedFiles) {\n';
+        cmd += '    $ext = $file.Extension.ToLower()\n';
+        
+        // Logique vidéo
+        if (hasVid) {
+          let vidExtsWithJpeg = [...vidExts];
+          cmd += '    # Vidéo\n';
+          cmd += '    if (' + vidExtsWithJpeg.map(e => '$ext -eq ".' + e + '"').join(' -or ') + ') {\n';
+          
+          if (skipH265) {
+            cmd += '        $c = & $ffprobeCmd -v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 $file.FullName\n';
+            cmd += '        $target = "' + dest + '\\$($file.Name)"\n';
+            cmd += '        if ($c -match "hevc") {\n';
+            cmd += '            Write-Host "[HEVC] Copie de $($file.Name)" -ForegroundColor Green\n';
+            cmd += '            & $ffmpegCmd ' + skipDest + ' -i $file.FullName -c copy $target\n';
+            if (syncDate) cmd += '            if ($?) { $newFile = Get-Item $target; $newFile.CreationTime = $file.CreationTime; $newFile.LastWriteTime = $file.LastWriteTime }\n';
+            cmd += '        } else {\n';
+            cmd += '            Write-Host "[ENCODAGE] $($file.Name)" -ForegroundColor Yellow\n';
+            cmd += '            & $ffmpegCmd ' + skipDest + ' -i $file.FullName ' + mapMetadata + ' -c:v ' + codec + ' -crf ' + crf + ' -preset ' + preset + ' ' + audio + ' $target\n';
+            if (syncDate) cmd += '            if ($?) { $newFile = Get-Item $target; $newFile.CreationTime = $file.CreationTime; $newFile.LastWriteTime = $file.LastWriteTime }\n';
+            cmd += '        }\n';
+          } else {
+            cmd += '        $target = "' + dest + '\\$($file.Name)"\n';
+            cmd += '        Write-Host "[ENCODAGE] $($file.Name)" -ForegroundColor Yellow\n';
+            cmd += '        & $ffmpegCmd ' + skipDest + ' -i $file.FullName ' + mapMetadata + ' -c:v ' + codec + ' -crf ' + crf + ' -preset ' + preset + ' ' + audio + ' $target\n';
+            if (syncDate) cmd += '        if ($?) { $newFile = Get-Item $target; $newFile.CreationTime = $file.CreationTime; $newFile.LastWriteTime = $file.LastWriteTime }\n';
+          }
+          if (deleteOrig) cmd += '        if ($?) { Remove-Item $file.FullName }\n';
+          cmd += '    }\n';
+        }
+        
+        // Logique image
+        if (hasImg) {
+          let imgExtsWithJpeg = [...imgExts];
+          if (imgExtsWithJpeg.includes('jpg') && !imgExtsWithJpeg.includes('jpeg')) {
+            imgExtsWithJpeg.push('jpeg');
+          }
+          cmd += '    # Image\n';
+          cmd += '    if (' + imgExtsWithJpeg.map(e => '$ext -eq ".' + e + '"').join(' -or ') + ') {\n';
+          
+          if (imgFormat === "avif") {
+            cmd += '        $target = "' + dest + '\\$($file.BaseName).avif"\n';
+            cmd += '        Write-Host "[AVIF] $($file.Name) -> .avif" -ForegroundColor Magenta\n';
+            cmd += '        & $ffmpegCmd ' + skipDest + ' -i $file.FullName ' + mapMetadata + ' -c:v libaom-av1 -crf ' + avifCrf + ' -b:v 0 $target\n';
+          } else if (imgFormat === "webp") {
+            cmd += '        $target = "' + dest + '\\$($file.BaseName).webp"\n';
+            cmd += '        Write-Host "[WEBP] $($file.Name) -> .webp" -ForegroundColor Magenta\n';
+            cmd += '        & $ffmpegCmd ' + skipDest + ' -i $file.FullName ' + mapMetadata + ' -c:v libwebp -q:v ' + webpQ + ' $target\n';
+          } else {
+            cmd += '        $target = "' + dest + '\\$($file.Name)"\n';
+            cmd += '        Write-Host "[COMPRESS] $($file.Name)" -ForegroundColor Magenta\n';
+            cmd += '        & $ffmpegCmd ' + skipDest + ' -i $file.FullName ' + mapMetadata + ' -qscale:v 5 $target\n';
+          }
+          if (syncDate) cmd += '        if ($?) { $newFile = Get-Item $target; $newFile.CreationTime = $file.CreationTime; $newFile.LastWriteTime = $file.LastWriteTime }\n';
+          if (deleteOrig) cmd += '        if ($?) { Remove-Item $file.FullName }\n';
+          cmd += '    }\n';
+        }
+        
+        cmd += '}\n\n';
+      }
+      
+      // Copie des fichiers non sélectionnés
+      if (copyOtherFiles) {
+        cmd += '# Copie des fichiers non sélectionnés\n';
+        if (allFilters.length > 0) {
+          cmd += '$selectedExts = @(' + allFilters.map(f => '"' + f.substring(2) + '"').join(',') + ')\n';
+          cmd += '$otherFiles = Get-ChildItem -File -Depth 0 | Where-Object { $selectedExts -notcontains $_.Extension.ToLower().TrimStart(".") }\n';
+        } else {
+          cmd += '$otherFiles = Get-ChildItem -File -Depth 0\n';
+        }
+        cmd += 'if ($otherFiles.Count -gt 0) {\n';
+        cmd += '    Write-Host "=== COPIE DE " $otherFiles.Count " AUTRES FICHIERS ===" -ForegroundColor Yellow\n';
+        cmd += '    foreach ($file in $otherFiles' + (psSort ? psSort : '') + ') {\n';
+        cmd += '        $target = "' + dest + '\\$($file.Name)"\n';
+        cmd += '        Write-Host "[COPIE] $($file.Name)" -ForegroundColor Gray\n';
+        cmd += '        Copy-Item $file.FullName $target\n';
+        if (syncDate) cmd += '        if ($?) { $newFile = Get-Item $target; $newFile.CreationTime = $file.CreationTime; $newFile.LastWriteTime = $file.LastWriteTime }\n';
+        if (deleteOrig) cmd += '        if ($?) { Remove-Item $file.FullName }\n';
+        cmd += '    }\n';
+        cmd += '}\n\n';
+      }
+      
+      cmd += 'Write-Host "=== TRAITEMENT TERMINE ===" -ForegroundColor Green\n';
 
-      if (mediaType === "both" || mediaType === "video") {
-        let vidDel = deleteOrig ? '; if ($?) { Remove-Item $_.FullName }' : '';
+    } else if (os === "cmd") {
+      badge.textContent = "💾 À sauvegarder dans un fichier .bat et double-cliquer dessus";
+      badge.style.display = "inline-block";
+      
+      cmd += '@echo off\n';
+      cmd += 'chcp 65001 >nul\n';
+      cmd += 'cd /d "' + path + '"\n';
+      cmd += 'if not exist "' + dest + '" mkdir "' + dest + '"\n\n';
+      
+      let ffmpegCmd = 'ffmpeg';
+      let ffprobeCmd = 'ffprobe';
+      
+      if (customFfmpeg) {
+        ffmpegCmd = '"' + customFfmpeg + '"';
+        ffprobeCmd = '"' + customFfmpeg.replace(/ffmpeg\.exe/i, 'ffprobe.exe') + '"';
+      } else {
+        cmd += 'set "FFMPEG=ffmpeg"\n';
+        cmd += 'set "FFPROBE=ffprobe"\n';
+        cmd += 'where ffmpeg >nul 2>nul\n';
+        cmd += 'if %errorlevel% neq 0 (\n';
+        cmd += '    echo [INFO] FFmpeg introuvable. Recherche via Winget...\n';
+        cmd += '    for /f "delims=" %%F in (\'dir /b /s "%LOCALAPPDATA%\\Microsoft\\WinGet\\Packages\\*ffmpeg.exe" 2^>nul\') do set "FFMPEG=%%F"\n';
+        cmd += '    if defined FFMPEG for %%P in ("%FFMPEG%") do set "FFPROBE=%%~dpPffprobe.exe"\n';
+        cmd += ')\n\n';
+        cmd += 'if not defined FFMPEG (\n';
+        cmd += '    echo [ERREUR] FFmpeg introuvable. Utilisez le Mode Secours.\n';
+        cmd += '    pause\n';
+        cmd += '    exit /b 1\n';
+        cmd += ')\n\n';
+        ffmpegCmd = '"%FFMPEG%"';
+        ffprobeCmd = '"%FFPROBE%"';
+      }
+
+      if (hasVid) {
+        const vWildcards = vidExts.map(ext => '*.' + ext).join(' ');
+        
+        let vLoop;
+        if (sortOrder === 'oldest') {
+          vLoop = 'for /f "delims=" %%i in (\'dir /b /a-d /od ' + vWildcards + ' 2^>nul\') do (';
+        } else if (sortOrder === 'newest') {
+          vLoop = 'for /f "delims=" %%i in (\'dir /b /a-d /o-d ' + vWildcards + ' 2^>nul\') do (';
+        } else {
+          vLoop = 'for %%i in (' + vWildcards + ') do (';
+        }
+
+        let vidDel = deleteOrig ? ' && del "%%i"' : '';
+        cmd += 'echo === TRAITEMENT DES VIDEOS ===\n';
+        cmd += vLoop + '\n';
+        
         if (skipH265) {
-          cmd += 'Get-ChildItem *.mp4,*.mov,*.mkv' + psSort + ' | ForEach-Object { $c = ffprobe -v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 $_.FullName; if ($c -notmatch "hevc") { ffmpeg ' + skipDest + ' -i $_.FullName -c:v ' + codec + ' -crf ' + crf + ' -preset ' + preset + ' ' + audio + ' "' + dest + '\\$($_.Name)"' + vidDel + ' } }\n';
+          let action = ffmpegCmd + ' ' + skipDest + ' -i "%%i" ' + mapMetadata + ' -c:v ' + codec + ' -crf ' + crf + ' -preset ' + preset + ' ' + audio + ' "' + dest + '\\%%~nxi"' + vidDel;
+          let copyAction = ffmpegCmd + ' ' + skipDest + ' -i "%%i" -c copy "' + dest + '\\%%~nxi"' + vidDel;
+          
+          cmd += '    ' + ffprobeCmd + ' -v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "%%i" | findstr /i "hevc" >nul\n';
+          cmd += '    if %errorlevel% equ 0 (\n';
+          cmd += '        echo [HEVC Detecte] Copie directe de %%~nxi\n';
+          cmd += '        ' + copyAction + '\n';
+          cmd += '    ) else (\n';
+          cmd += '        echo [ENCODAGE] %%~nxi\n';
+          cmd += '        ' + action + '\n';
+          cmd += '    )\n';
         } else {
-          cmd += 'Get-ChildItem *.mp4,*.mov,*.mkv' + psSort + ' | ForEach-Object { ffmpeg ' + skipDest + ' -i $_.FullName -c:v ' + codec + ' -crf ' + crf + ' -preset ' + preset + ' ' + audio + ' "' + dest + '\\$($_.Name)"' + vidDel + ' }\n';
+          let action = ffmpegCmd + ' ' + skipDest + ' -i "%%i" ' + mapMetadata + ' -c:v ' + codec + ' -crf ' + crf + ' -preset ' + preset + ' ' + audio + ' "' + dest + '\\%%~nxi"' + vidDel;
+          cmd += '    ' + action + '\n';
         }
+        cmd += ')\n\n';
       }
 
-      if (mediaType === "both" || mediaType === "image") {
-        let imgDel = deleteOrig ? '; if ($?) { Remove-Item $_.FullName }' : '';
-        if (imgFormat === "webp") {
-          cmd += 'Get-ChildItem *.jpg,*.jpeg,*.png' + psSort + ' | ForEach-Object { ffmpeg ' + skipDest + ' -i $_.FullName -c:v libwebp -q:v ' + imgQuality + ' "' + dest + '\\$($_.BaseName).webp"' + imgDel + ' }\n';
-        } else {
-          cmd += 'Get-ChildItem *.jpg,*.jpeg,*.png' + psSort + ' | ForEach-Object { ffmpeg ' + skipDest + ' -i $_.FullName -qscale:v 5 "' + dest + '\\$($_.Name)"' + imgDel + ' }\n';
+      if (hasImg) {
+        let iWildcards = imgExts.map(ext => '*.' + ext).join(' ');
+        if (iWildcards.indexOf('*.jpg') !== -1 && iWildcards.indexOf('*.jpeg') === -1) {
+          iWildcards += ' *.jpeg';
         }
+        
+        let iLoop;
+        if (sortOrder === 'oldest') {
+          iLoop = 'for /f "delims=" %%i in (\'dir /b /a-d /od ' + iWildcards + ' 2^>nul\') do (';
+        } else if (sortOrder === 'newest') {
+          iLoop = 'for /f "delims=" %%i in (\'dir /b /a-d /o-d ' + iWildcards + ' 2^>nul\') do (';
+        } else {
+          iLoop = 'for %%i in (' + iWildcards + ') do (';
+        }
+
+        let imgDel = deleteOrig ? ' && del "%%i"' : '';
+        cmd += 'echo === TRAITEMENT DES IMAGES ===\n';
+        cmd += iLoop + '\n';
+        
+        let action = "";
+        let extOut = "";
+        if (imgFormat === "avif") {
+          extOut = ".avif";
+          action = ffmpegCmd + ' ' + skipDest + ' -i "%%i" ' + mapMetadata + ' -c:v libaom-av1 -crf ' + avifCrf + ' -b:v 0 "' + dest + '\\%%~ni' + extOut + '"' + imgDel;
+        } else if (imgFormat === "webp") {
+          extOut = ".webp";
+          action = ffmpegCmd + ' ' + skipDest + ' -i "%%i" ' + mapMetadata + ' -c:v libwebp -q:v ' + webpQ + ' "' + dest + '\\%%~ni' + extOut + '"' + imgDel;
+        } else {
+          extOut = "";
+          action = ffmpegCmd + ' ' + skipDest + ' -i "%%i" ' + mapMetadata + ' -qscale:v 5 "' + dest + '\\%%~nxi"' + imgDel;
+        }
+        cmd += '    ' + action + '\n';
+        cmd += ')\n\n';
       }
+      
+      if (copyOtherFiles && (hasVid || hasImg)) {
+        cmd += 'echo === COPIE DES AUTRES FICHIERS ===\n';
+        cmd += 'for %%i in (*) do (\n';
+        cmd += '    set "EXT=%%~xi"\n';
+        
+        let allExts = [];
+        if (hasVid) allExts.push(...vidExts);
+        if (hasImg) {
+          allExts.push(...imgExts);
+          if (imgExts.includes('jpg') && !imgExts.includes('jpeg')) {
+            allExts.push('jpeg');
+          }
+        }
+        
+        let conditions = allExts.map(ext => 'if /i "!EXT!"==".%EXT%" goto :skip').join('\n    ');
+        cmd += '    setlocal enabledelayedexpansion\n';
+        cmd += '    ' + conditions.replace(/%EXT%/g, (match, offset, str) => {
+          const ext = allExts[conditions.substring(0, offset).split('if').length - 1];
+          return ext;
+        }) + '\n';
+        
+        // Simplified approach - just check each extension
+        cmd = cmd.split('\n').slice(0, -allExts.length - 1).join('\n') + '\n';
+        cmd += '    set "SKIP=0"\n';
+        allExts.forEach(ext => {
+          cmd += '    if /i "%%~xi"==".%EXT%" set "SKIP=1"\n'.replace('%EXT%', ext);
+        });
+        cmd += '    if "!SKIP!"=="0" (\n';
+        cmd += '        echo [COPIE] %%~nxi\n';
+        cmd += '        copy /y "%%i" "' + dest + '\\%%~nxi" >nul\n';
+        if (deleteOrig) cmd += '        del "%%i"\n';
+        cmd += '    )\n';
+        cmd += '    endlocal\n';
+        cmd += ')\n\n';
+      }
+      
+      cmd += 'echo.\n';
+      cmd += 'echo === Traitement termine ===\n';
+      cmd += 'pause\n';
 
     } else if (os === "bash") {
       badge.textContent = "🐧 À coller directement dans le Terminal (Bash/Zsh)";
       badge.style.display = "inline-block";
       
-      let bVidLoop = 'for file in *.{mp4,mov,mkv}; do [ -f "$file" ] && ';
-      if (sortOrder === 'oldest') bVidLoop = 'ls -1tr *.{mp4,mov,mkv} 2>/dev/null | while IFS= read -r file; do ';
-      if (sortOrder === 'newest') bVidLoop = 'ls -1t *.{mp4,mov,mkv} 2>/dev/null | while IFS= read -r file; do ';
-
-      let bImgLoop = 'for file in *.{jpg,jpeg,png}; do [ -f "$file" ] && ';
-      if (sortOrder === 'oldest') bImgLoop = 'ls -1tr *.{jpg,jpeg,png} 2>/dev/null | while IFS= read -r file; do ';
-      if (sortOrder === 'newest') bImgLoop = 'ls -1t *.{jpg,jpeg,png} 2>/dev/null | while IFS= read -r file; do ';
+      let ffmpegCmdStr = customFfmpeg ? '"' + customFfmpeg + '"' : "ffmpeg";
+      let ffprobeCmdStr = customFfmpeg ? '"' + customFfmpeg.replace(/ffmpeg/i, 'ffprobe') + '"' : "ffprobe";
 
       cmd += 'cd "' + path + '"\n';
-      cmd += 'mkdir -p "' + dest + '"\n';
+      cmd += 'mkdir -p "' + dest + '"\n\n';
+      
+      let syncLogic = syncDate ? ' && touch -r "$file" "$target"' : '';
+      let delLogic = deleteOrig ? ' && rm "$file"' : '';
 
-      if (mediaType === "both" || mediaType === "video") {
-        let vidDel = deleteOrig ? ' && rm "$file"' : '';
-        if (skipH265) {
-          cmd += bVidLoop + '{ ffprobe -v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "$file" | grep -iq "hevc" || { ffmpeg ' + skipDest + ' -i "$file" -c:v ' + codec + ' -crf ' + crf + ' -preset ' + preset + ' ' + audio + ' "' + dest + '/$file"' + vidDel + '; }; }; done\n';
+      if (hasVid) {
+        const vWild = vidExts.join(',');
+        
+        let bVidLoop;
+        if (sortOrder === 'oldest') {
+          bVidLoop = 'ls -1tr *.{' + vWild + '} 2>/dev/null | while IFS= read -r file; do ';
+        } else if (sortOrder === 'newest') {
+          bVidLoop = 'ls -1t *.{' + vWild + '} 2>/dev/null | while IFS= read -r file; do ';
         } else {
-          cmd += bVidLoop + '{ ffmpeg ' + skipDest + ' -i "$file" -c:v ' + codec + ' -crf ' + crf + ' -preset ' + preset + ' ' + audio + ' "' + dest + '/$file"' + vidDel + '; }; done\n';
+          bVidLoop = 'for file in *.{' + vWild + '}; do [ -f "$file" ] && ';
+        }
+
+        cmd += 'echo "=== TRAITEMENT DES VIDEOS ==="\n';
+        
+        if (skipH265) {
+          cmd += bVidLoop + '{ target="' + dest + '/$file"; if ' + ffprobeCmdStr + ' -v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "$file" | grep -iq "hevc"; then echo "[HEVC] Copie de $file"; ' + ffmpegCmdStr + ' ' + skipDest + ' -i "$file" -c copy "$target"' + syncLogic + delLogic + '; else echo "[ENCODAGE] $file"; ' + ffmpegCmdStr + ' ' + skipDest + ' -i "$file" ' + mapMetadata + ' -c:v ' + codec + ' -crf ' + crf + ' -preset ' + preset + ' ' + audio + ' "$target"' + syncLogic + delLogic + '; fi; }; done\n';
+        } else {
+          cmd += bVidLoop + '{ target="' + dest + '/$file"; ' + ffmpegCmdStr + ' ' + skipDest + ' -i "$file" ' + mapMetadata + ' -c:v ' + codec + ' -crf ' + crf + ' -preset ' + preset + ' ' + audio + ' "$target"' + syncLogic + delLogic + '; }; done\n';
         }
       }
 
-      if (mediaType === "both" || mediaType === "image") {
-        let imgDel = deleteOrig ? ' && rm "$file"' : '';
-        if (imgFormat === "webp") {
-          cmd += bImgLoop + '{ ffmpeg ' + skipDest + ' -i "$file" -c:v libwebp -q:v ' + imgQuality + ' "' + dest + '/${file%.*}.webp"' + imgDel + '; }; done\n';
-        } else {
-          cmd += bImgLoop + '{ ffmpeg ' + skipDest + ' -i "$file" -qscale:v 5 "' + dest + '/$file"' + imgDel + '; }; done\n';
+      if (hasImg) {
+        let iWild = imgExts.join(',');
+        if (iWild.indexOf('jpg') !== -1 && iWild.indexOf('jpeg') === -1) {
+          iWild += ',jpeg';
         }
+        
+        let bImgLoop;
+        if (sortOrder === 'oldest') {
+          bImgLoop = 'ls -1tr *.{' + iWild + '} 2>/dev/null | while IFS= read -r file; do ';
+        } else if (sortOrder === 'newest') {
+          bImgLoop = 'ls -1t *.{' + iWild + '} 2>/dev/null | while IFS= read -r file; do ';
+        } else {
+          bImgLoop = 'for file in *.{' + iWild + '}; do [ -f "$file" ] && ';
+        }
+
+        cmd += '\necho "=== TRAITEMENT DES IMAGES ==="\n';
+        
+        if (imgFormat === "avif") {
+          cmd += bImgLoop + '{ target="' + dest + '/${file%.*}.avif"; ' + ffmpegCmdStr + ' ' + skipDest + ' -i "$file" ' + mapMetadata + ' -c:v libaom-av1 -crf ' + avifCrf + ' -b:v 0 "$target"' + syncLogic + delLogic + '; }; done\n';
+        } else if (imgFormat === "webp") {
+          cmd += bImgLoop + '{ target="' + dest + '/${file%.*}.webp"; ' + ffmpegCmdStr + ' ' + skipDest + ' -i "$file" ' + mapMetadata + ' -c:v libwebp -q:v ' + webpQ + ' "$target"' + syncLogic + delLogic + '; }; done\n';
+        } else {
+          cmd += bImgLoop + '{ target="' + dest + '/$file"; ' + ffmpegCmdStr + ' ' + skipDest + ' -i "$file" ' + mapMetadata + ' -qscale:v 5 "$target"' + syncLogic + delLogic + '; }; done\n';
+        }
+      }
+      
+      if (copyOtherFiles && (hasVid || hasImg)) {
+        let allExts = [];
+        if (hasVid) allExts.push(...vidExts);
+        if (hasImg) {
+          allExts.push(...imgExts);
+          if (allExts.includes('jpg') && !allExts.includes('jpeg')) {
+            allExts.push('jpeg');
+          }
+        }
+        
+        cmd += '\necho "=== COPIE DES AUTRES FICHIERS ==="\n';
+        
+        let bOtherLoop;
+        if (sortOrder === 'oldest') {
+          bOtherLoop = 'ls -1tr * 2>/dev/null | while IFS= read -r file; do ';
+        } else if (sortOrder === 'newest') {
+          bOtherLoop = 'ls -1t * 2>/dev/null | while IFS= read -r file; do ';
+        } else {
+          bOtherLoop = 'for file in *; do [ -f "$file" ] && ';
+        }
+        
+        let extCheck = allExts.map(ext => '[[ "$file" == *.' + ext + ' ]]').join(' || ');
+        cmd += bOtherLoop + '{ target="' + dest + '/$file"; if ! (' + extCheck + '); then echo "[COPIE] $file"; cp "$file" "$target"' + syncLogic + delLogic + '; fi; }; done\n';
       }
     }
 
-    document.getElementById('result').textContent = cmd.trim();
+    resultEl.textContent = cmd.trim();
   } catch (error) {
-    document.getElementById('result').textContent = "Erreur de génération : " + error.message;
+    document.getElementById('result').textContent = "❌ Erreur de génération : " + error.message;
+    console.error("Erreur détaillée:", error);
   }
 }
 
 function copyCommand() {
   const textToCopy = document.getElementById('result').textContent;
   const btn = document.getElementById('copyBtn');
+  
+  if (textToCopy.startsWith('⚠️') || textToCopy.startsWith('❌')) {
+    alert("Rien à copier ! " + textToCopy);
+    return;
+  }
   
   if (navigator.clipboard && window.isSecureContext) {
     navigator.clipboard.writeText(textToCopy).then(showSuccess);
@@ -349,15 +746,16 @@ function copyCommand() {
   function showSuccess() {
     btn.textContent = "✅ Copié !";
     btn.style.background = "#10b981";
-    setTimeout(() => { 
+    setTimeout(function() { 
       btn.textContent = "Copier le code"; 
       btn.style.background = "var(--accent)"; 
     }, 2000);
   }
 }
 
-// Initialisation au chargement de la page
-updateUI();
+document.addEventListener('DOMContentLoaded', function() {
+  updateUI();
+});
 </script>
 
 </body>
