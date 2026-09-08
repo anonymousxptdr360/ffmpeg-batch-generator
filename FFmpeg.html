@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Générateur FFmpeg Ultimate V3</title>
+  <title>Générateur FFmpeg Ultimate V4</title>
   <style>
     :root {
       --bg-color: #0f172a; --card-bg: #1e293b; --accent: #3b82f6;
@@ -40,12 +40,13 @@
     
     .help-text { font-size: 0.85em; color: var(--text-muted); margin-top: 8px; background: var(--info-bg); padding: 10px 12px; border-left: 3px solid var(--accent); border-radius: 4px; flex-grow: 1; }
     .help-text strong { color: var(--text-main); }
+    .fix-badge { background: rgba(239, 68, 68, 0.15); color: #f87171; padding: 2px 6px; border-radius: 4px; font-size: 0.75em; font-weight: bold; margin-left: 5px; }
   </style>
 </head>
 <body>
 
 <div class="card">
-  <h2>⚡ FFmpeg Ultimate CLI V3</h2>
+  <h2>⚡ FFmpeg Ultimate CLI V4 <span class="fix-badge">AVIF FIX</span></h2>
 
   <div class="section">
     <div class="row">
@@ -138,10 +139,10 @@
         <label><input type="checkbox" class="img-ext" value="jpg" checked onchange="generate()"> .JPG/.JPEG</label>
         <label><input type="checkbox" class="img-ext" value="png" checked onchange="generate()"> .PNG</label>
         <label><input type="checkbox" class="img-ext" value="webp" onchange="generate()"> .WebP</label>
-        <label><input type="checkbox" class="img-ext" value="heic" onchange="generate()"> .HEIC (iPhone)</label>
+        <label><input type="checkbox" class="img-ext" value="heic" checked onchange="generate()"> .HEIC (iPhone) <span class="fix-badge">NOUVEAU</span></label>
       </div>
       <div class="help-text">
-        <strong>HEIC désactivé par défaut</strong> : Convertir un HEIC lui fait perdre ses données "Live Photo" et ses calques de profondeur. Active-le uniquement pour les images statiques.
+        <strong>HEIC activé par défaut</strong> : Convertit les photos iPhone. Note : la conversion en AVIF/WebP perd les données "Live Photo" et les calques de profondeur.
       </div>
     </div>
   </div>
@@ -221,14 +222,29 @@
         <label for="imgQuality">Qualité Image :</label>
         <select id="imgQuality" onchange="generate()">
           <option value="20">AVIF 20 / WebP 90 - Excellente (Fichiers plus gros)</option>
-          <option value="30" selected>AVIF 30 / WebP 80 - Équilibré</option>
+          <option value="28" selected>AVIF 28 / WebP 80 - Équilibré</option>
           <option value="40">AVIF 40 / WebP 60 - Forte compression (Fichiers très légers)</option>
         </select>
         <div class="help-text">
-          <strong>AVIF 30</strong> est l'équivalent visuel de JPG qualité 85 ou WebP 80.<br>
+          <strong>AVIF 28</strong> est le sweet spot pour l'archivage.<br>
           <strong>Note :</strong> L'encodage AVIF est plus gourmand en CPU que WebP.
         </div>
       </div>
+    </div>
+    <div id="avifEncoderSection" style="margin-top: 15px;">
+      <label for="avifEncoder">Encodeur AVIF :</label>
+      <select id="avifEncoder" onchange="generate()">
+        <option value="libaom-av1" selected>libaom-av1 (Meilleure compression, lent)</option>
+        <option value="libsvtav1">libsvtav1 (Rapide, moins compatible) <span class="fix-badge">OPTIONNEL</span></option>
+      </select>
+      <div class="help-text">
+        <strong>libaom-av1</strong> : Encodeur officiel AV1, compression maximale mais très lent (plusieurs secondes par image).<br>
+        <strong>libsvtav1</strong> : Encodeur optimisé par Intel, 10-50x plus rapide mais compression légèrement inférieure. Nécessite une version récente de FFmpeg.
+      </div>
+    </div>
+    <div class="checkbox-group" style="margin-top: 15px;">
+      <input type="checkbox" id="autorotate" checked onchange="generate()">
+      <label for="autorotate">Appliquer automatiquement la rotation EXIF (photos iPhone)<br><small style="color:var(--text-muted)">Évite les photos pivotées à 90° ou à l'envers après conversion</small></label>
     </div>
   </div>
 
@@ -259,6 +275,7 @@ function updateUI() {
   const videoInput = document.getElementById('videoInputSection');
   const imageSection = document.getElementById('imageSection');
   const imageInput = document.getElementById('imageInputSection');
+  const avifEncoderSection = document.getElementById('avifEncoderSection');
   
   if (type === 'both' || type === 'video') {
     videoSection.style.display = 'block';
@@ -271,9 +288,12 @@ function updateUI() {
   if (type === 'both' || type === 'image') {
     imageSection.style.display = 'block';
     imageInput.style.display = 'block';
+    const imgFormat = document.getElementById('imgFormat').value;
+    avifEncoderSection.style.display = imgFormat === 'avif' ? 'block' : 'none';
   } else {
     imageSection.style.display = 'none';
     imageInput.style.display = 'none';
+    avifEncoderSection.style.display = 'none';
   }
   
   generate();
@@ -302,6 +322,7 @@ function generate() {
     const deleteOrig = document.getElementById('deleteOrig').checked;
     const syncDate = document.getElementById('syncDate').checked;
     const copyOtherFiles = document.getElementById('copyOtherFiles').checked;
+    const autorotate = document.getElementById('autorotate').checked;
 
     const codec = document.getElementById('codec').value;
     const crf = document.getElementById('crf').value;
@@ -310,9 +331,10 @@ function generate() {
 
     const imgFormat = document.getElementById('imgFormat').value;
     const rawImgQuality = document.getElementById('imgQuality').value;
+    const avifEncoder = document.getElementById('avifEncoder').value;
     
     const avifCrf = rawImgQuality;
-    const webpQ = rawImgQuality === "20" ? "90" : (rawImgQuality === "30" ? "80" : "60");
+    const webpQ = rawImgQuality === "20" ? "90" : (rawImgQuality === "28" ? "80" : "60");
 
     const customFfmpeg = document.getElementById('customFfmpeg').value.trim();
 
@@ -330,6 +352,8 @@ function generate() {
 
     let cmd = "";
     const mapMetadata = syncDate ? "-map_metadata 0" : "";
+    const autorotateFlag = autorotate ? " -autorotate" : "";
+    const imgFilter = autorotate ? ' -vf "transpose=dir=auto"' : '';
 
     if (os === "ps") {
       badge.textContent = "📟 À coller directement dans le terminal PowerShell";
@@ -409,17 +433,18 @@ function generate() {
             cmd += '        $target = "' + dest + '\\$($file.Name)"\n';
             cmd += '        if ($c -match "hevc") {\n';
             cmd += '            Write-Host "[HEVC] Copie de $($file.Name)" -ForegroundColor Green\n';
+            // Copie directe sans autorotate
             cmd += '            & $ffmpegCmd ' + skipDest + ' -i $file.FullName -c copy $target\n';
             if (syncDate) cmd += '            if ($?) { $newFile = Get-Item $target; $newFile.CreationTime = $file.CreationTime; $newFile.LastWriteTime = $file.LastWriteTime }\n';
             cmd += '        } else {\n';
             cmd += '            Write-Host "[ENCODAGE] $($file.Name)" -ForegroundColor Yellow\n';
-            cmd += '            & $ffmpegCmd ' + skipDest + ' -i $file.FullName ' + mapMetadata + ' -c:v ' + codec + ' -crf ' + crf + ' -preset ' + preset + ' ' + audio + ' $target\n';
+            cmd += '            & $ffmpegCmd ' + skipDest + autorotateFlag + ' -i $file.FullName ' + mapMetadata + ' -c:v ' + codec + ' -crf ' + crf + ' -preset ' + preset + ' ' + audio + ' $target\n';
             if (syncDate) cmd += '            if ($?) { $newFile = Get-Item $target; $newFile.CreationTime = $file.CreationTime; $newFile.LastWriteTime = $file.LastWriteTime }\n';
             cmd += '        }\n';
           } else {
             cmd += '        $target = "' + dest + '\\$($file.Name)"\n';
             cmd += '        Write-Host "[ENCODAGE] $($file.Name)" -ForegroundColor Yellow\n';
-            cmd += '        & $ffmpegCmd ' + skipDest + ' -i $file.FullName ' + mapMetadata + ' -c:v ' + codec + ' -crf ' + crf + ' -preset ' + preset + ' ' + audio + ' $target\n';
+            cmd += '        & $ffmpegCmd ' + skipDest + autorotateFlag + ' -i $file.FullName ' + mapMetadata + ' -c:v ' + codec + ' -crf ' + crf + ' -preset ' + preset + ' ' + audio + ' $target\n';
             if (syncDate) cmd += '        if ($?) { $newFile = Get-Item $target; $newFile.CreationTime = $file.CreationTime; $newFile.LastWriteTime = $file.LastWriteTime }\n';
           }
           if (deleteOrig) cmd += '        if ($?) { Remove-Item $file.FullName }\n';
@@ -438,15 +463,21 @@ function generate() {
           if (imgFormat === "avif") {
             cmd += '        $target = "' + dest + '\\$($file.BaseName).avif"\n';
             cmd += '        Write-Host "[AVIF] $($file.Name) -> .avif" -ForegroundColor Magenta\n';
-            cmd += '        & $ffmpegCmd ' + skipDest + ' -i $file.FullName ' + mapMetadata + ' -c:v libaom-av1 -crf ' + avifCrf + ' -b:v 0 $target\n';
+            
+            // Commande AVIF avec filtre de rotation
+            if (avifEncoder === "libsvtav1") {
+              cmd += '        & $ffmpegCmd ' + skipDest + ' -i $file.FullName ' + mapMetadata + imgFilter + ' -c:v libsvtav1 -crf ' + avifCrf + ' -preset 6 -pix_fmt yuv420p -color_range pc -colorspace bt709 -color_primaries bt709 -color_trc bt709 $target\n';
+            } else {
+              cmd += '        & $ffmpegCmd ' + skipDest + ' -i $file.FullName ' + mapMetadata + imgFilter + ' -c:v libaom-av1 -crf ' + avifCrf + ' -b:v 0 -pix_fmt yuv420p -color_range pc -colorspace bt709 -color_primaries bt709 -color_trc bt709 -still-picture 1 $target\n';
+            }
           } else if (imgFormat === "webp") {
             cmd += '        $target = "' + dest + '\\$($file.BaseName).webp"\n';
             cmd += '        Write-Host "[WEBP] $($file.Name) -> .webp" -ForegroundColor Magenta\n';
-            cmd += '        & $ffmpegCmd ' + skipDest + ' -i $file.FullName ' + mapMetadata + ' -c:v libwebp -q:v ' + webpQ + ' $target\n';
+            cmd += '        & $ffmpegCmd ' + skipDest + ' -i $file.FullName ' + mapMetadata + imgFilter + ' -c:v libwebp -q:v ' + webpQ + ' $target\n';
           } else {
             cmd += '        $target = "' + dest + '\\$($file.Name)"\n';
             cmd += '        Write-Host "[COMPRESS] $($file.Name)" -ForegroundColor Magenta\n';
-            cmd += '        & $ffmpegCmd ' + skipDest + ' -i $file.FullName ' + mapMetadata + ' -qscale:v 5 $target\n';
+            cmd += '        & $ffmpegCmd ' + skipDest + ' -i $file.FullName ' + mapMetadata + imgFilter + ' -qscale:v 5 $target\n';
           }
           if (syncDate) cmd += '        if ($?) { $newFile = Get-Item $target; $newFile.CreationTime = $file.CreationTime; $newFile.LastWriteTime = $file.LastWriteTime }\n';
           if (deleteOrig) cmd += '        if ($?) { Remove-Item $file.FullName }\n';
@@ -529,7 +560,8 @@ function generate() {
         cmd += vLoop + '\n';
         
         if (skipH265) {
-          let action = ffmpegCmd + ' ' + skipDest + ' -i "%%i" ' + mapMetadata + ' -c:v ' + codec + ' -crf ' + crf + ' -preset ' + preset + ' ' + audio + ' "' + dest + '\\%%~nxi"' + vidDel;
+          let action = ffmpegCmd + ' ' + skipDest + autorotateFlag + ' -i "%%i" ' + mapMetadata + ' -c:v ' + codec + ' -crf ' + crf + ' -preset ' + preset + ' ' + audio + ' "' + dest + '\\%%~nxi"' + vidDel;
+          // Copie directe sans autorotate
           let copyAction = ffmpegCmd + ' ' + skipDest + ' -i "%%i" -c copy "' + dest + '\\%%~nxi"' + vidDel;
           
           cmd += '    ' + ffprobeCmd + ' -v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "%%i" | findstr /i "hevc" >nul\n';
@@ -541,7 +573,7 @@ function generate() {
           cmd += '        ' + action + '\n';
           cmd += '    )\n';
         } else {
-          let action = ffmpegCmd + ' ' + skipDest + ' -i "%%i" ' + mapMetadata + ' -c:v ' + codec + ' -crf ' + crf + ' -preset ' + preset + ' ' + audio + ' "' + dest + '\\%%~nxi"' + vidDel;
+          let action = ffmpegCmd + ' ' + skipDest + autorotateFlag + ' -i "%%i" ' + mapMetadata + ' -c:v ' + codec + ' -crf ' + crf + ' -preset ' + preset + ' ' + audio + ' "' + dest + '\\%%~nxi"' + vidDel;
           cmd += '    ' + action + '\n';
         }
         cmd += ')\n\n';
@@ -570,23 +602,29 @@ function generate() {
         let extOut = "";
         if (imgFormat === "avif") {
           extOut = ".avif";
-          action = ffmpegCmd + ' ' + skipDest + ' -i "%%i" ' + mapMetadata + ' -c:v libaom-av1 -crf ' + avifCrf + ' -b:v 0 "' + dest + '\\%%~ni' + extOut + '"' + imgDel;
+          // Commande AVIF avec filtre de rotation
+          if (avifEncoder === "libsvtav1") {
+            action = ffmpegCmd + ' ' + skipDest + ' -i "%%i" ' + mapMetadata + imgFilter + ' -c:v libsvtav1 -crf ' + avifCrf + ' -preset 6 -pix_fmt yuv420p -color_range pc -colorspace bt709 -color_primaries bt709 -color_trc bt709 "' + dest + '\\%%~ni' + extOut + '"' + imgDel;
+          } else {
+            action = ffmpegCmd + ' ' + skipDest + ' -i "%%i" ' + mapMetadata + imgFilter + ' -c:v libaom-av1 -crf ' + avifCrf + ' -b:v 0 -pix_fmt yuv420p -color_range pc -colorspace bt709 -color_primaries bt709 -color_trc bt709 -still-picture 1 "' + dest + '\\%%~ni' + extOut + '"' + imgDel;
+          }
         } else if (imgFormat === "webp") {
           extOut = ".webp";
-          action = ffmpegCmd + ' ' + skipDest + ' -i "%%i" ' + mapMetadata + ' -c:v libwebp -q:v ' + webpQ + ' "' + dest + '\\%%~ni' + extOut + '"' + imgDel;
+          action = ffmpegCmd + ' ' + skipDest + ' -i "%%i" ' + mapMetadata + imgFilter + ' -c:v libwebp -q:v ' + webpQ + ' "' + dest + '\\%%~ni' + extOut + '"' + imgDel;
         } else {
           extOut = "";
-          action = ffmpegCmd + ' ' + skipDest + ' -i "%%i" ' + mapMetadata + ' -qscale:v 5 "' + dest + '\\%%~nxi"' + imgDel;
+          action = ffmpegCmd + ' ' + skipDest + ' -i "%%i" ' + mapMetadata + imgFilter + ' -qscale:v 5 "' + dest + '\\%%~nxi"' + imgDel;
         }
         cmd += '    ' + action + '\n';
         cmd += ')\n\n';
       }
       
+      // Copie des fichiers non sélectionnés - Version corrigée
       if (copyOtherFiles && (hasVid || hasImg)) {
         cmd += 'echo === COPIE DES AUTRES FICHIERS ===\n';
+        cmd += 'setlocal enabledelayedexpansion\n';
         cmd += 'for %%i in (*) do (\n';
-        cmd += '    set "EXT=%%~xi"\n';
-        
+        cmd += '    set "SKIP=0"\n';
         let allExts = [];
         if (hasVid) allExts.push(...vidExts);
         if (hasImg) {
@@ -595,27 +633,16 @@ function generate() {
             allExts.push('jpeg');
           }
         }
-        
-        let conditions = allExts.map(ext => 'if /i "!EXT!"==".%EXT%" goto :skip').join('\n    ');
-        cmd += '    setlocal enabledelayedexpansion\n';
-        cmd += '    ' + conditions.replace(/%EXT%/g, (match, offset, str) => {
-          const ext = allExts[conditions.substring(0, offset).split('if').length - 1];
-          return ext;
-        }) + '\n';
-        
-        // Simplified approach - just check each extension
-        cmd = cmd.split('\n').slice(0, -allExts.length - 1).join('\n') + '\n';
-        cmd += '    set "SKIP=0"\n';
         allExts.forEach(ext => {
-          cmd += '    if /i "%%~xi"==".%EXT%" set "SKIP=1"\n'.replace('%EXT%', ext);
+          cmd += '    if /i "%%~xi"==".' + ext + '" set "SKIP=1"\n';
         });
         cmd += '    if "!SKIP!"=="0" (\n';
         cmd += '        echo [COPIE] %%~nxi\n';
         cmd += '        copy /y "%%i" "' + dest + '\\%%~nxi" >nul\n';
         if (deleteOrig) cmd += '        del "%%i"\n';
         cmd += '    )\n';
-        cmd += '    endlocal\n';
-        cmd += ')\n\n';
+        cmd += ')\n';
+        cmd += 'endlocal\n\n';
       }
       
       cmd += 'echo.\n';
@@ -638,21 +665,25 @@ function generate() {
       if (hasVid) {
         const vWild = vidExts.join(',');
         
+        // Correction : gestion du cas avec une seule extension
+        let vWildBash = vidExts.length > 1 ? '*.{' + vWild + '}' : '*.' + vidExts[0];
+        
         let bVidLoop;
         if (sortOrder === 'oldest') {
-          bVidLoop = 'ls -1tr *.{' + vWild + '} 2>/dev/null | while IFS= read -r file; do ';
+          bVidLoop = 'ls -1tr ' + vWildBash + ' 2>/dev/null | while IFS= read -r file; do ';
         } else if (sortOrder === 'newest') {
-          bVidLoop = 'ls -1t *.{' + vWild + '} 2>/dev/null | while IFS= read -r file; do ';
+          bVidLoop = 'ls -1t ' + vWildBash + ' 2>/dev/null | while IFS= read -r file; do ';
         } else {
-          bVidLoop = 'for file in *.{' + vWild + '}; do [ -f "$file" ] && ';
+          bVidLoop = 'for file in ' + vWildBash + '; do [ -f "$file" ] && ';
         }
 
         cmd += 'echo "=== TRAITEMENT DES VIDEOS ==="\n';
         
         if (skipH265) {
-          cmd += bVidLoop + '{ target="' + dest + '/$file"; if ' + ffprobeCmdStr + ' -v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "$file" | grep -iq "hevc"; then echo "[HEVC] Copie de $file"; ' + ffmpegCmdStr + ' ' + skipDest + ' -i "$file" -c copy "$target"' + syncLogic + delLogic + '; else echo "[ENCODAGE] $file"; ' + ffmpegCmdStr + ' ' + skipDest + ' -i "$file" ' + mapMetadata + ' -c:v ' + codec + ' -crf ' + crf + ' -preset ' + preset + ' ' + audio + ' "$target"' + syncLogic + delLogic + '; fi; }; done\n';
+          // Copie directe sans autorotate
+          cmd += bVidLoop + '{ target="' + dest + '/$file"; if ' + ffprobeCmdStr + ' -v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "$file" | grep -iq "hevc"; then echo "[HEVC] Copie de $file"; ' + ffmpegCmdStr + ' ' + skipDest + ' -i "$file" -c copy "$target"' + syncLogic + delLogic + '; else echo "[ENCODAGE] $file"; ' + ffmpegCmdStr + ' ' + skipDest + autorotateFlag + ' -i "$file" ' + mapMetadata + ' -c:v ' + codec + ' -crf ' + crf + ' -preset ' + preset + ' ' + audio + ' "$target"' + syncLogic + delLogic + '; fi; }; done\n';
         } else {
-          cmd += bVidLoop + '{ target="' + dest + '/$file"; ' + ffmpegCmdStr + ' ' + skipDest + ' -i "$file" ' + mapMetadata + ' -c:v ' + codec + ' -crf ' + crf + ' -preset ' + preset + ' ' + audio + ' "$target"' + syncLogic + delLogic + '; }; done\n';
+          cmd += bVidLoop + '{ target="' + dest + '/$file"; ' + ffmpegCmdStr + ' ' + skipDest + autorotateFlag + ' -i "$file" ' + mapMetadata + ' -c:v ' + codec + ' -crf ' + crf + ' -preset ' + preset + ' ' + audio + ' "$target"' + syncLogic + delLogic + '; }; done\n';
         }
       }
 
@@ -662,23 +693,34 @@ function generate() {
           iWild += ',jpeg';
         }
         
+        // Correction : gestion du cas avec une seule extension
+        let iWildBash = imgExts.length > 1 ? '*.{' + iWild + '}' : '*.' + imgExts[0];
+        if (imgExts.length === 1 && imgExts[0] === 'jpg') {
+          iWildBash = '*.jpg *.jpeg';
+        }
+        
         let bImgLoop;
         if (sortOrder === 'oldest') {
-          bImgLoop = 'ls -1tr *.{' + iWild + '} 2>/dev/null | while IFS= read -r file; do ';
+          bImgLoop = 'ls -1tr ' + iWildBash + ' 2>/dev/null | while IFS= read -r file; do ';
         } else if (sortOrder === 'newest') {
-          bImgLoop = 'ls -1t *.{' + iWild + '} 2>/dev/null | while IFS= read -r file; do ';
+          bImgLoop = 'ls -1t ' + iWildBash + ' 2>/dev/null | while IFS= read -r file; do ';
         } else {
-          bImgLoop = 'for file in *.{' + iWild + '}; do [ -f "$file" ] && ';
+          bImgLoop = 'for file in ' + iWildBash + '; do [ -f "$file" ] && ';
         }
 
         cmd += '\necho "=== TRAITEMENT DES IMAGES ==="\n';
         
         if (imgFormat === "avif") {
-          cmd += bImgLoop + '{ target="' + dest + '/${file%.*}.avif"; ' + ffmpegCmdStr + ' ' + skipDest + ' -i "$file" ' + mapMetadata + ' -c:v libaom-av1 -crf ' + avifCrf + ' -b:v 0 "$target"' + syncLogic + delLogic + '; }; done\n';
+          // Commande AVIF avec filtre de rotation
+          if (avifEncoder === "libsvtav1") {
+            cmd += bImgLoop + '{ target="' + dest + '/${file%.*}.avif"; ' + ffmpegCmdStr + ' ' + skipDest + ' -i "$file" ' + mapMetadata + imgFilter + ' -c:v libsvtav1 -crf ' + avifCrf + ' -preset 6 -pix_fmt yuv420p -color_range pc -colorspace bt709 -color_primaries bt709 -color_trc bt709 "$target"' + syncLogic + delLogic + '; }; done\n';
+          } else {
+            cmd += bImgLoop + '{ target="' + dest + '/${file%.*}.avif"; ' + ffmpegCmdStr + ' ' + skipDest + ' -i "$file" ' + mapMetadata + imgFilter + ' -c:v libaom-av1 -crf ' + avifCrf + ' -b:v 0 -pix_fmt yuv420p -color_range pc -colorspace bt709 -color_primaries bt709 -color_trc bt709 -still-picture 1 "$target"' + syncLogic + delLogic + '; }; done\n';
+          }
         } else if (imgFormat === "webp") {
-          cmd += bImgLoop + '{ target="' + dest + '/${file%.*}.webp"; ' + ffmpegCmdStr + ' ' + skipDest + ' -i "$file" ' + mapMetadata + ' -c:v libwebp -q:v ' + webpQ + ' "$target"' + syncLogic + delLogic + '; }; done\n';
+          cmd += bImgLoop + '{ target="' + dest + '/${file%.*}.webp"; ' + ffmpegCmdStr + ' ' + skipDest + ' -i "$file" ' + mapMetadata + imgFilter + ' -c:v libwebp -q:v ' + webpQ + ' "$target"' + syncLogic + delLogic + '; }; done\n';
         } else {
-          cmd += bImgLoop + '{ target="' + dest + '/$file"; ' + ffmpegCmdStr + ' ' + skipDest + ' -i "$file" ' + mapMetadata + ' -qscale:v 5 "$target"' + syncLogic + delLogic + '; }; done\n';
+          cmd += bImgLoop + '{ target="' + dest + '/$file"; ' + ffmpegCmdStr + ' ' + skipDest + ' -i "$file" ' + mapMetadata + imgFilter + ' -qscale:v 5 "$target"' + syncLogic + delLogic + '; }; done\n';
         }
       }
       
