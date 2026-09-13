@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Générateur FFmpeg Ultimate V4</title>
+  <title>Générateur FFmpeg Ultimate V5.9</title>
   <style>
     :root {
       --bg-color: #0f172a; --card-bg: #1e293b; --accent: #3b82f6;
@@ -18,8 +18,8 @@
     .section:last-child { border-bottom: none; }
     label { display: block; margin-top: 15px; font-weight: 600; font-size: 0.9em; color: var(--text-muted); margin-bottom: 5px; }
     
-    input[type="text"], select { width: 100%; padding: 12px; background: #0f172a; color: #fff; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; font-size: 1em; }
-    input[type="text"]::placeholder { color: #475569; font-style: italic; }
+    input[type="text"], input[type="number"], select { width: 100%; padding: 12px; background: #0f172a; color: #fff; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; font-size: 1em; }
+    input[type="text"]::placeholder, input[type="number"]::placeholder { color: #475569; font-style: italic; }
     
     .row { display: flex; gap: 20px; flex-wrap: wrap; }
     .row > div { flex: 1; min-width: 250px; display: flex; flex-direction: column; }
@@ -41,12 +41,28 @@
     .help-text { font-size: 0.85em; color: var(--text-muted); margin-top: 8px; background: var(--info-bg); padding: 10px 12px; border-left: 3px solid var(--accent); border-radius: 4px; flex-grow: 1; }
     .help-text strong { color: var(--text-main); }
     .fix-badge { background: rgba(239, 68, 68, 0.15); color: #f87171; padding: 2px 6px; border-radius: 4px; font-size: 0.75em; font-weight: bold; margin-left: 5px; }
+    .apple-badge { background: rgba(16, 185, 129, 0.15); color: #34d399; padding: 2px 6px; border-radius: 4px; font-size: 0.75em; font-weight: bold; margin-left: 5px; }
+    .python-badge { background: rgba(59, 130, 246, 0.15); color: #60a5fa; padding: 2px 6px; border-radius: 4px; font-size: 0.75em; font-weight: bold; margin-left: 5px; }
+    .magick-badge { background: rgba(139, 92, 246, 0.15); color: #a78bfa; padding: 2px 6px; border-radius: 4px; font-size: 0.75em; font-weight: bold; margin-left: 5px; }
+    .classic-badge { background: rgba(251, 191, 36, 0.15); color: #fbbf24; padding: 2px 6px; border-radius: 4px; font-size: 0.75em; font-weight: bold; margin-left: 5px; }
+    
+    .custom-quality-row { display: flex; gap: 10px; align-items: center; margin-top: 8px; }
+    .custom-quality-row input[type="number"] { flex: 1; padding: 8px 12px; }
+    .custom-quality-row .quality-hint { font-size: 0.8em; color: var(--text-muted); white-space: nowrap; }
+    
+    .tutorial-box { background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(16, 185, 129, 0.05)); border: 1px solid rgba(59, 130, 246, 0.3); border-left: 4px solid var(--accent); border-radius: 8px; padding: 18px; margin-top: 15px; }
+    .tutorial-box h4 { margin: 0 0 12px 0; color: var(--accent); font-size: 1em; }
+    .tutorial-box .step { background: #0f172a; padding: 10px 14px; border-radius: 6px; margin: 8px 0; font-family: 'Consolas', monospace; font-size: 0.85em; border: 1px solid var(--border); }
+    .tutorial-box .step code { display: block; color: var(--success); white-space: pre-wrap; word-break: break-all; margin: 0; min-height: auto; }
+    .tutorial-box ul { margin: 8px 0 12px 0; padding-left: 20px; color: var(--text-muted); font-size: 0.9em; }
+    .tutorial-box ul li { margin: 4px 0; }
+    .tutorial-box .note { background: rgba(251, 191, 36, 0.1); border-left: 3px solid #fbbf24; padding: 8px 12px; border-radius: 4px; margin-top: 12px; font-size: 0.85em; color: #fcd34d; }
   </style>
 </head>
 <body>
 
 <div class="card">
-  <h2>⚡ FFmpeg Ultimate CLI V4 <span class="fix-badge">AVIF FIX</span></h2>
+  <h2>⚡ FFmpeg Ultimate CLI V5.9 <span class="apple-badge">HEIC + EXIF</span></h2>
 
   <div class="section">
     <div class="row">
@@ -91,7 +107,7 @@
     </div>
     <div class="checkbox-group">
       <input type="checkbox" id="syncDate" checked onchange="generate()">
-      <label for="syncDate">Conserver les dates d'origine<br><small style="color:var(--text-muted)">Clone la date de création/modification + préserve les données EXIF des photos</small></label>
+      <label for="syncDate">Conserver les dates du système de fichiers<br><small style="color:var(--text-muted)">Clone la date de création/modification du fichier Windows/NTFS</small></label>
     </div>
     <div class="checkbox-group">
       <input type="checkbox" id="skipH265" checked onchange="generate()">
@@ -142,7 +158,7 @@
         <label><input type="checkbox" class="img-ext" value="heic" checked onchange="generate()"> .HEIC (iPhone) <span class="fix-badge">NOUVEAU</span></label>
       </div>
       <div class="help-text">
-        <strong>HEIC activé par défaut</strong> : Convertit les photos iPhone. Note : la conversion en AVIF/WebP perd les données "Live Photo" et les calques de profondeur.
+        <strong>HEIC activé par défaut</strong> : Convertit les photos iPhone. Note : la conversion vers un autre format perd les données "Live Photo" et les calques de profondeur.
       </div>
     </div>
   </div>
@@ -207,27 +223,47 @@
     <div class="row">
       <div>
         <label for="imgFormat">Format Image Cible :</label>
-        <select id="imgFormat" onchange="generate()">
-          <option value="avif" selected>Convertir en AVIF (Compression maximale)</option>
+        <select id="imgFormat" onchange="updateUI()">
+          <option value="avif">Convertir en AVIF (Compression maximale)</option>
+          <option value="heic" selected>Convertir en HEIC (Compatible Apple Photos)</option>
           <option value="webp">Convertir en WebP</option>
+          <option value="jpg">Convertir en JPG <span class="classic-badge">CLASSIQUE</span></option>
+          <option value="png">Convertir en PNG (Sans perte)</option>
           <option value="keep">Conserver le format source (JPG/PNG)</option>
         </select>
         <div class="help-text">
-          <strong>AVIF</strong> : Compression ~20% meilleure que WebP à qualité égale. C'est le futur standard, supporté par tous les navigateurs modernes.<br>
+          <strong>HEIC</strong> : Format Apple natif (compression HEVC). <span class="python-badge">pillow-heif</span><br>
+          <strong>AVIF</strong> : Compression ~20% meilleure que WebP à qualité égale, mais moins compatible.<br>
           <strong>WebP</strong> : Excellent compromis, compatible quasi partout.<br>
+          <strong>JPG</strong> : Format classique universel, qualité ajustable. <span class="classic-badge">FFmpeg</span><br>
+          <strong>PNG</strong> : Sans perte (qualité parfaite), fichiers plus lourds. <span class="classic-badge">FFmpeg</span><br>
           <strong>Garder le format</strong> : Utile si tu veux juste réduire la qualité/poids sans changer l'extension.
         </div>
       </div>
       <div>
-        <label for="imgQuality">Qualité Image :</label>
+        <label for="imgQuality">Qualité Image (CRF générique 0-63) :</label>
         <select id="imgQuality" onchange="generate()">
-          <option value="20">AVIF 20 / WebP 90 - Excellente (Fichiers plus gros)</option>
-          <option value="28" selected>AVIF 28 / WebP 80 - Équilibré</option>
-          <option value="40">AVIF 40 / WebP 60 - Forte compression (Fichiers très légers)</option>
+          <option value="10">10 - Quasi lossless (Fichier très lourd)</option>
+          <option value="15">15 - Qualité maximale</option>
+          <option value="20">20 - Excellente qualité</option>
+          <option value="23">23 - Haute qualité</option>
+          <option value="25">25 - Très bonne qualité</option>
+          <option value="28" selected>28 - Équilibré (Sweet spot)</option>
+          <option value="32">32 - Bonne compression</option>
+          <option value="36">36 - Compression modérée</option>
+          <option value="40">40 - Forte compression</option>
+          <option value="45">45 - Très forte compression</option>
+          <option value="50">50 - Compression extrême (Fichier léger)</option>
         </select>
+        <div class="custom-quality-row">
+          <input type="number" id="customImgQuality" min="0" max="63" step="1" placeholder="CRF personnalisé (0-63)" oninput="generate()">
+          <span class="quality-hint">Outrepasse le preset</span>
+        </div>
         <div class="help-text">
-          <strong>AVIF 28</strong> est le sweet spot pour l'archivage.<br>
-          <strong>Note :</strong> L'encodage AVIF est plus gourmand en CPU que WebP.
+          <strong>Plus le CRF est bas, meilleure est la qualité</strong>.<br>
+          <strong>28</strong> est le sweet spot pour l'archivage.<br>
+          <strong>Champ personnalisé :</strong> Si rempli, il ignore le preset ci-dessus. Valeur CRF générique 0-63, automatiquement convertie pour chaque format (AVIF, HEIC, WebP, JPG).<br>
+          <strong>Note :</strong> PNG est toujours sans perte, ce paramètre n'a aucun effet dessus.
         </div>
       </div>
     </div>
@@ -239,23 +275,61 @@
       </select>
       <div class="help-text">
         <strong>libaom-av1</strong> : Encodeur officiel AV1, compression maximale mais très lent (plusieurs secondes par image).<br>
-        <strong>libsvtav1</strong> : Encodeur optimisé par Intel, 10-50x plus rapide mais compression légèrement inférieure. Nécessite une version récente de FFmpeg.
+        <strong>libsvtav1</strong> : Encodeur optimisé par Intel, 10-50x plus rapide mais compression légèrement inférieure.
       </div>
     </div>
+    
+    <div id="heicPythonSection" style="display: none;">
+      <div class="tutorial-box">
+        <h4>🐍 Conversion HEIC via Python + pillow-heif <span class="python-badge">CROSS-PLATFORM</span></h4>
+        <p style="color:var(--text-main); margin: 8px 0; font-size: 0.9em;">
+          L'équipe de <strong>libheif</strong> ne publie pas d'exécutables Windows (`.exe`) compilés dans ses releases officielles (ils ne mettent que les archives sources Linux/Unix).<br>
+          <strong>La solution 100% fonctionnelle</strong> sur Windows, Mac <strong>et</strong> Linux : passer par la bibliothèque Python <code style="color: var(--accent); background: #0f172a; padding: 2px 6px; border-radius: 4px;">pillow-heif</code> qui intègre déjà les binaires compilés de libheif et x265 pour Windows 64-bit.
+        </p>
+        
+        <h4 style="margin-top: 15px; color: var(--text-main);">⚙️ Installation à lancer <strong>une seule fois</strong> :</h4>
+        <div class="step">
+          <code>pip install pillow-heif</code>
+        </div>
+        
+        <h4 style="margin-top: 15px; color: var(--text-main);">🧪 Test rapide sur un fichier :</h4>
+        <div class="step">
+          <code id="heicTestCmd">python -c "import pillow_heif, sys; from PIL import Image; pillow_heif.register_heif_opener(); Image.open(sys.argv[1]).save(sys.argv[2], quality=80)" test.jpg test.heic</code>
+        </div>
+        
+        <div class="note">
+          <strong>💡 Automatique :</strong> Le script détecte Python et pillow-heif. Si pillow-heif n'est pas installé, il tente l'installation automatique via <code>pip install pillow-heif</code>.
+        </div>
+        
+        <h4 style="margin-top: 15px; color: var(--text-main);">📋 Commande de conversion générée :</h4>
+        <div class="step">
+          <code id="heicGenCmd">python -c "import pillow_heif, sys; from PIL import Image; pillow_heif.register_heif_opener(); Image.open(sys.argv[1]).save(sys.argv[2], quality=80)" "input.jpg" "output.heic"</code>
+        </div>
+      </div>
+    </div>
+
     <div class="checkbox-group" style="margin-top: 15px;">
       <input type="checkbox" id="autorotate" checked onchange="generate()">
       <label for="autorotate">Appliquer automatiquement la rotation EXIF (photos iPhone)<br><small style="color:var(--text-muted)">Évite les photos pivotées à 90° ou à l'envers après conversion</small></label>
     </div>
+    <div class="checkbox-group" style="margin-top: 15px; border-color: rgba(16, 185, 129, 0.3);">
+      <input type="checkbox" id="preserveExif" checked onchange="generate()">
+      <label for="preserveExif">
+        🍎 Préserver les métadonnées EXIF via ExifTool <span class="apple-badge">APPLE PHOTOS</span><br>
+        <small style="color:var(--text-muted)">Indispensable pour Apple Photos qui lit le tag interne <code>DateTimeOriginal</code>, et non les dates système Windows.<br>
+        <strong style="color:#fbbf24;">⚠️ Requiert :</strong> <code>winget install OliverBetz.ExifTool</code> puis redémarrer le terminal.</small>
+      </label>
+    </div>
   </div>
 
   <div class="section">
-    <label style="color:var(--accent);">⚙️ Mode Secours (Si FFmpeg n'est pas reconnu)</label>
+    <label style="color:var(--accent);">⚙️ Mode Secours (Si outils non reconnus)</label>
     <div class="row">
       <div>
         <label for="customFfmpeg">Chemin exact de ffmpeg.exe (optionnel) :</label>
-        <input type="text" id="customFfmpeg" placeholder="Laisser vide pour détection automatique (ex: C:\ffmpeg\bin\ffmpeg.exe)" oninput="generate()">
+        <input type="text" id="customFfmpeg" placeholder="Laisser vide pour détection automatique" oninput="generate()">
         <div class="help-text">
-          Laisse vide en général. Le script essaiera de trouver FFmpeg automatiquement dans le PATH ou via Winget.
+          Laisse vide en général. Le script essaiera de trouver FFmpeg automatiquement.
         </div>
       </div>
     </div>
@@ -276,6 +350,7 @@ function updateUI() {
   const imageSection = document.getElementById('imageSection');
   const imageInput = document.getElementById('imageInputSection');
   const avifEncoderSection = document.getElementById('avifEncoderSection');
+  const heicPythonSection = document.getElementById('heicPythonSection');
   
   if (type === 'both' || type === 'video') {
     videoSection.style.display = 'block';
@@ -290,18 +365,91 @@ function updateUI() {
     imageInput.style.display = 'block';
     const imgFormat = document.getElementById('imgFormat').value;
     avifEncoderSection.style.display = imgFormat === 'avif' ? 'block' : 'none';
+    heicPythonSection.style.display = imgFormat === 'heic' ? 'block' : 'none';
+    updateHeicTuto();
   } else {
     imageSection.style.display = 'none';
     imageInput.style.display = 'none';
     avifEncoderSection.style.display = 'none';
+    heicPythonSection.style.display = 'none';
   }
   
   generate();
 }
 
+function updateHeicTuto() {
+  const os = document.getElementById('os').value;
+  const quality = document.getElementById('imgQuality').value;
+  const heicQ = quality === "20" ? "90" : (quality === "28" ? "80" : "65");
+  
+  let pyCmd = "python";
+  let pythonNote = "Windows PowerShell : `python`";
+  
+  if (os === "bash") {
+    pyCmd = "python3";
+    pythonNote = "Linux/Mac : `python3` (et `pip3` au lieu de `pip`)";
+  }
+  
+  const testCmd = `${pyCmd} -c "import pillow_heif, sys; from PIL import Image; pillow_heif.register_heif_opener(); Image.open(sys.argv[1]).save(sys.argv[2], quality=${heicQ})" test.jpg test.heic`;
+  const genCmd = `${pyCmd} -c "import pillow_heif, sys; from PIL import Image; pillow_heif.register_heif_opener(); Image.open(sys.argv[1]).save(sys.argv[2], quality=${heicQ})" "input.jpg" "output.heic"`;
+  
+  const testEl = document.getElementById('heicTestCmd');
+  const genEl = document.getElementById('heicGenCmd');
+  if (testEl) testEl.textContent = testCmd;
+  if (genEl) genEl.textContent = genCmd;
+}
+
 function getSelectedExtensions(className) {
   const checkboxes = document.querySelectorAll('.' + className + ':checked');
   return Array.from(checkboxes).map(cb => cb.value);
+}
+
+// Helper unifié pour post-traitement PowerShell
+function postProcessPs(syncDate, deleteOrig, exifTool = false, indent = '            ') {
+  let block = '';
+  block += indent + 'if ($LASTEXITCODE -eq 0 -and (Test-Path -LiteralPath $target)) {\n';
+  
+  if (exifTool) {
+    block += indent + '    Write-Host "[EXIF] Synchronisation métadonnées : $($file.Name)" -ForegroundColor Yellow\n';
+    block += indent + '    & $exifToolCmd -overwrite_original -TagsFromFile $file.FullName "-all:all>all:all" $target 2>$null\n';
+  }
+  
+  if (syncDate) {
+    block += indent + '    $newFile = Get-Item -LiteralPath $target;\n';
+    block += indent + '    $newFile.CreationTime = $file.CreationTime;\n';
+    block += indent + '    $newFile.LastWriteTime = $file.LastWriteTime;\n';
+  }
+  
+  if (deleteOrig) {
+    block += indent + '    Remove-Item -LiteralPath $file.FullName -Force\n';
+  }
+  
+  block += indent + '}\n';
+  return block;
+}
+
+// Fonction pour convertir un CRF générique (0-63) vers les valeurs spécifiques de chaque format
+function convertCrfToFormat(crf, format) {
+  crf = Math.max(0, Math.min(63, parseInt(crf) || 28));
+  
+  switch(format) {
+    case 'avif':
+      // AVIF utilise directement le CRF (0-63)
+      return crf.toString();
+    case 'heic':
+      // HEIC utilise une échelle 0-100 (plus haut = meilleure qualité)
+      // CRF 0 -> qualité 100, CRF 63 -> qualité 0
+      return Math.round(100 - (crf * 100 / 63)).toString();
+    case 'webp':
+      // WebP utilise q:v (0-100, plus haut = meilleure qualité)
+      return Math.round(100 - (crf * 100 / 63)).toString();
+    case 'jpg':
+      // JPG qscale:v (2-31, plus bas = meilleure qualité)
+      // CRF 0 -> qscale 2, CRF 63 -> qscale 31
+      return Math.round(2 + (crf * 29 / 63)).toString();
+    default:
+      return crf.toString();
+  }
 }
 
 function generate() {
@@ -323,6 +471,7 @@ function generate() {
     const syncDate = document.getElementById('syncDate').checked;
     const copyOtherFiles = document.getElementById('copyOtherFiles').checked;
     const autorotate = document.getElementById('autorotate').checked;
+    const preserveExif = document.getElementById('preserveExif').checked;
 
     const codec = document.getElementById('codec').value;
     const crf = document.getElementById('crf').value;
@@ -331,10 +480,17 @@ function generate() {
 
     const imgFormat = document.getElementById('imgFormat').value;
     const rawImgQuality = document.getElementById('imgQuality').value;
+    const customImgQuality = document.getElementById('customImgQuality').value.trim();
     const avifEncoder = document.getElementById('avifEncoder').value;
     
-    const avifCrf = rawImgQuality;
-    const webpQ = rawImgQuality === "20" ? "90" : (rawImgQuality === "28" ? "80" : "60");
+    // Déterminer le CRF final (le champ personnalisé outrepasse le preset)
+    const finalCrf = customImgQuality !== "" ? customImgQuality : rawImgQuality;
+    
+    // Convertir le CRF générique vers les valeurs spécifiques de chaque format
+    const avifCrf = convertCrfToFormat(finalCrf, 'avif');
+    const heicQ = convertCrfToFormat(finalCrf, 'heic');
+    const webpQ = convertCrfToFormat(finalCrf, 'webp');
+    const jpgQ = convertCrfToFormat(finalCrf, 'jpg');
 
     const customFfmpeg = document.getElementById('customFfmpeg').value.trim();
 
@@ -343,6 +499,7 @@ function generate() {
     
     let hasVid = (mediaType === 'both' || mediaType === 'video') && vidExts.length > 0;
     let hasImg = (mediaType === 'both' || mediaType === 'image') && imgExts.length > 0;
+    const useHeic = hasImg && imgFormat === "heic";
     
     if (!hasVid && !hasImg && !copyOtherFiles) {
       badge.textContent = "⚠️ Aucune extension sélectionnée";
@@ -353,17 +510,18 @@ function generate() {
     let cmd = "";
     const mapMetadata = syncDate ? "-map_metadata 0" : "";
     const autorotateFlag = autorotate ? " -autorotate" : "";
-    const imgFilter = autorotate ? ' -vf "transpose=dir=auto"' : '';
+    const imgFilter = autorotate ? ' -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2"' : '';
 
     if (os === "ps") {
       badge.textContent = "📟 À coller directement dans le terminal PowerShell";
       badge.style.display = "inline-block";
       
+      cmd += '& {\n';
       cmd += 'Set-Location "' + path + '"\n';
       cmd += 'if (!(Test-Path "' + dest + '")) { New-Item -ItemType Directory -Force -Path "' + dest + '" | Out-Null }\n\n';
 
-      // Détection FFmpeg
-      if (!customFfmpeg) {
+      // Détection FFmpeg (sauf si seulement HEIC et pas de vidéo)
+      if (!customFfmpeg && (hasVid || (hasImg && imgFormat !== "heic"))) {
         cmd += '# Détection automatique de FFmpeg\n';
         cmd += '$ffmpegCmd = Get-Command ffmpeg -ErrorAction SilentlyContinue\n';
         cmd += 'if (-not $ffmpegCmd) {\n';
@@ -390,13 +548,80 @@ function generate() {
         cmd += 'if (-not $ffmpegCmd -or -not (Test-Path $ffmpegCmd)) {\n';
         cmd += '    Write-Host "[ERREUR] FFmpeg introuvable. Installez-le avec: winget install Gyan.FFmpeg" -ForegroundColor Red\n';
         cmd += '    Write-Host "Puis redémarrez PowerShell ou utilisez le Mode Secours." -ForegroundColor Yellow\n';
-        cmd += '    exit\n';
+        cmd += '    Read-Host "Appuyez sur Entrée pour fermer"\n';
+        cmd += '    return\n';
         cmd += '}\n\n';
-        cmd += '$ffprobeCmd = $ffmpegCmd -replace "ffmpeg\\.exe$", "ffprobe.exe"\n';
+        if (hasVid) {
+          cmd += '$ffprobeCmd = $ffmpegCmd -replace "ffmpeg\\.exe$", "ffprobe.exe"\n';
+        }
         cmd += 'Write-Host "[INFO] FFmpeg trouvé: $ffmpegCmd" -ForegroundColor Green\n\n';
-      } else {
+      } else if (customFfmpeg) {
         cmd += '$ffmpegCmd = "' + customFfmpeg + '"\n';
-        cmd += '$ffprobeCmd = "' + customFfmpeg.replace(/ffmpeg\.exe/i, 'ffprobe.exe') + '"\n\n';
+        if (hasVid) {
+          cmd += '$ffprobeCmd = "' + customFfmpeg.replace(/ffmpeg\.exe/i, 'ffprobe.exe') + '"\n';
+        }
+        cmd += '\n';
+      }
+
+      // Détection Python + pillow-heif (REQUIS pour HEIC)
+      if (useHeic) {
+        cmd += '# Détection de Python et pillow-heif (REQUIS pour l\'encodage HEIC)\n';
+        cmd += '$pythonCmd = Get-Command python -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source\n';
+        cmd += 'if (-not $pythonCmd) {\n';
+        cmd += '    $pythonCmd = Get-Command py -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source\n';
+        cmd += '}\n';
+        cmd += 'if (-not $pythonCmd -or -not (Test-Path -LiteralPath $pythonCmd)) {\n';
+        cmd += '    Write-Host "[ERREUR] Python introuvable." -ForegroundColor Red\n';
+        cmd += '    Write-Host "L\'encodage HEIC nécessite Python." -ForegroundColor Yellow\n';
+        cmd += '    Write-Host "Téléchargez Python sur : https://www.python.org/downloads/" -ForegroundColor Cyan\n';
+        cmd += '    Write-Host "⚠️ Cochez bien \'Add Python to PATH\' lors de l\'installation !" -ForegroundColor Yellow\n';
+        cmd += '    Read-Host "Appuyez sur Entrée pour fermer"\n';
+        cmd += '    return\n';
+        cmd += '}\n';
+        cmd += 'Write-Host "[INFO] Python trouvé: $pythonCmd" -ForegroundColor Green\n\n';
+        
+        cmd += '# Vérifier que pillow-heif est installé\n';
+        cmd += '& $pythonCmd -c "import pillow_heif" 2>$null\n';
+        cmd += 'if ($LASTEXITCODE -ne 0) {\n';
+        cmd += '    Write-Host "[INFO] pillow-heif n\'est pas installé. Installation automatique..." -ForegroundColor Yellow\n';
+        cmd += '    & $pythonCmd -m pip install --quiet pillow-heif\n';
+        cmd += '    if ($LASTEXITCODE -ne 0) {\n';
+        cmd += '        Write-Host "[ERREUR] Échec de l\'installation. Lancez manuellement :" -ForegroundColor Red\n';
+        cmd += '        Write-Host "    pip install pillow-heif" -ForegroundColor Cyan\n';
+        cmd += '        Read-Host "Appuyez sur Entrée pour fermer"\n';
+        cmd += '        return\n';
+        cmd += '    }\n';
+        cmd += '    Write-Host "[INFO] pillow-heif installé avec succès !" -ForegroundColor Green\n';
+        cmd += '} else {\n';
+        cmd += '    Write-Host "[INFO] pillow-heif détecté" -ForegroundColor Green\n';
+        cmd += '}\n\n';
+      }
+
+      // Détection ExifTool (si requis)
+      if (preserveExif && hasImg) {
+        cmd += '# Détection automatique d\'ExifTool (pour les métadonnées EXIF)\n';
+        cmd += '$exifToolCmd = Get-Command exiftool -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source\n';
+        cmd += 'if (-not $exifToolCmd) {\n';
+        cmd += '    $standardPaths = @(\n';
+        cmd += '        "$env:LOCALAPPDATA\\Programs\\ExifTool\\ExifTool.exe",\n';
+        cmd += '        "$env:LOCALAPPDATA\\Programs\\ExifTool\\exiftool.exe",\n';
+        cmd += '        "C:\\Program Files\\exiftool\\exiftool.exe",\n';
+        cmd += '        "C:\\Program Files (x86)\\exiftool\\exiftool.exe",\n';
+        cmd += '        "$env:LOCALAPPDATA\\Microsoft\\WinGet\\Links\\exiftool.exe",\n';
+        cmd += '        "$env:ProgramData\\chocolatey\\bin\\exiftool.exe"\n';
+        cmd += '    )\n';
+        cmd += '    foreach ($sp in $standardPaths) {\n';
+        cmd += '        if (Test-Path -LiteralPath $sp) { $exifToolCmd = $sp; break }\n';
+        cmd += '    }\n';
+        cmd += '}\n';
+        cmd += 'if (-not $exifToolCmd -or -not (Test-Path -LiteralPath $exifToolCmd)) {\n';
+        cmd += '    Write-Host "[ERREUR] ExifTool introuvable." -ForegroundColor Red\n';
+        cmd += '    Write-Host "Installez-le avec: winget install OliverBetz.ExifTool" -ForegroundColor Yellow\n';
+        cmd += '    Write-Host "Puis FERMEZ et ROUVREZ PowerShell pour rafraîchir le PATH." -ForegroundColor Yellow\n';
+        cmd += '    Read-Host "Appuyez sur Entrée pour fermer"\n';
+        cmd += '    return\n';
+        cmd += '}\n';
+        cmd += 'Write-Host "[INFO] ExifTool trouvé: $exifToolCmd" -ForegroundColor Green\n\n';
       }
 
       // Construction des filtres
@@ -413,7 +638,6 @@ function generate() {
       if (sortOrder === 'oldest') psSort = ' | Sort-Object LastWriteTime';
       if (sortOrder === 'newest') psSort = ' | Sort-Object LastWriteTime -Descending';
 
-      // Traitement unifié (vidéos + images triés ensemble par date)
       if (allFilters.length > 0) {
         cmd += '# Traitement des fichiers sélectionnés (triés par date)\n';
         cmd += '$selectedFiles = Get-ChildItem -Include ' + allFilters.join(',') + ' -Depth 0' + psSort + '\n';
@@ -433,21 +657,19 @@ function generate() {
             cmd += '        $target = "' + dest + '\\$($file.Name)"\n';
             cmd += '        if ($c -match "hevc") {\n';
             cmd += '            Write-Host "[HEVC] Copie de $($file.Name)" -ForegroundColor Green\n';
-            // Copie directe sans autorotate
             cmd += '            & $ffmpegCmd ' + skipDest + ' -i $file.FullName -c copy $target\n';
-            if (syncDate) cmd += '            if ($?) { $newFile = Get-Item $target; $newFile.CreationTime = $file.CreationTime; $newFile.LastWriteTime = $file.LastWriteTime }\n';
+            cmd += postProcessPs(syncDate, deleteOrig, false, '            ');
             cmd += '        } else {\n';
             cmd += '            Write-Host "[ENCODAGE] $($file.Name)" -ForegroundColor Yellow\n';
             cmd += '            & $ffmpegCmd ' + skipDest + autorotateFlag + ' -i $file.FullName ' + mapMetadata + ' -c:v ' + codec + ' -crf ' + crf + ' -preset ' + preset + ' ' + audio + ' $target\n';
-            if (syncDate) cmd += '            if ($?) { $newFile = Get-Item $target; $newFile.CreationTime = $file.CreationTime; $newFile.LastWriteTime = $file.LastWriteTime }\n';
+            cmd += postProcessPs(syncDate, deleteOrig, false, '            ');
             cmd += '        }\n';
           } else {
             cmd += '        $target = "' + dest + '\\$($file.Name)"\n';
             cmd += '        Write-Host "[ENCODAGE] $($file.Name)" -ForegroundColor Yellow\n';
             cmd += '        & $ffmpegCmd ' + skipDest + autorotateFlag + ' -i $file.FullName ' + mapMetadata + ' -c:v ' + codec + ' -crf ' + crf + ' -preset ' + preset + ' ' + audio + ' $target\n';
-            if (syncDate) cmd += '        if ($?) { $newFile = Get-Item $target; $newFile.CreationTime = $file.CreationTime; $newFile.LastWriteTime = $file.LastWriteTime }\n';
+            cmd += postProcessPs(syncDate, deleteOrig, false, '        ');
           }
-          if (deleteOrig) cmd += '        if ($?) { Remove-Item $file.FullName }\n';
           cmd += '    }\n';
         }
         
@@ -462,25 +684,36 @@ function generate() {
           
           if (imgFormat === "avif") {
             cmd += '        $target = "' + dest + '\\$($file.BaseName).avif"\n';
-            cmd += '        Write-Host "[AVIF] $($file.Name) -> .avif" -ForegroundColor Magenta\n';
-            
-            // Commande AVIF avec filtre de rotation
+            cmd += '        Write-Host "[AVIF] $($file.Name) -> .avif (CRF ' + avifCrf + ')" -ForegroundColor Magenta\n';
             if (avifEncoder === "libsvtav1") {
               cmd += '        & $ffmpegCmd ' + skipDest + ' -i $file.FullName ' + mapMetadata + imgFilter + ' -c:v libsvtav1 -crf ' + avifCrf + ' -preset 6 -pix_fmt yuv420p -color_range pc -colorspace bt709 -color_primaries bt709 -color_trc bt709 $target\n';
             } else {
               cmd += '        & $ffmpegCmd ' + skipDest + ' -i $file.FullName ' + mapMetadata + imgFilter + ' -c:v libaom-av1 -crf ' + avifCrf + ' -b:v 0 -pix_fmt yuv420p -color_range pc -colorspace bt709 -color_primaries bt709 -color_trc bt709 -still-picture 1 $target\n';
             }
+          } else if (imgFormat === "heic") {
+            cmd += '        $target = "' + dest + '\\$($file.BaseName).heic"\n';
+            cmd += '        Write-Host "[HEIC] $($file.Name) -> .heic (qualité ' + heicQ + '/100)" -ForegroundColor Cyan\n';
+            cmd += '        & $pythonCmd -c "import pillow_heif, sys; from PIL import Image; pillow_heif.register_heif_opener(); Image.open(sys.argv[1]).save(sys.argv[2], quality=' + heicQ + ')" $file.FullName $target\n';
           } else if (imgFormat === "webp") {
             cmd += '        $target = "' + dest + '\\$($file.BaseName).webp"\n';
-            cmd += '        Write-Host "[WEBP] $($file.Name) -> .webp" -ForegroundColor Magenta\n';
+            cmd += '        Write-Host "[WEBP] $($file.Name) -> .webp (qualité ' + webpQ + '/100)" -ForegroundColor Magenta\n';
             cmd += '        & $ffmpegCmd ' + skipDest + ' -i $file.FullName ' + mapMetadata + imgFilter + ' -c:v libwebp -q:v ' + webpQ + ' $target\n';
+          } else if (imgFormat === "jpg") {
+            cmd += '        $target = "' + dest + '\\$($file.BaseName).jpg"\n';
+            cmd += '        Write-Host "[JPG] $($file.Name) -> .jpg (qscale ' + jpgQ + ')" -ForegroundColor Yellow\n';
+            cmd += '        & $ffmpegCmd ' + skipDest + ' -i $file.FullName ' + mapMetadata + imgFilter + ' -c:v mjpeg -qscale:v ' + jpgQ + ' $target\n';
+          } else if (imgFormat === "png") {
+            cmd += '        $target = "' + dest + '\\$($file.BaseName).png"\n';
+            cmd += '        Write-Host "[PNG] $($file.Name) -> .png (sans perte)" -ForegroundColor Cyan\n';
+            cmd += '        & $ffmpegCmd ' + skipDest + ' -i $file.FullName ' + mapMetadata + imgFilter + ' -c:v png $target\n';
           } else {
             cmd += '        $target = "' + dest + '\\$($file.Name)"\n';
             cmd += '        Write-Host "[COMPRESS] $($file.Name)" -ForegroundColor Magenta\n';
             cmd += '        & $ffmpegCmd ' + skipDest + ' -i $file.FullName ' + mapMetadata + imgFilter + ' -qscale:v 5 $target\n';
           }
-          if (syncDate) cmd += '        if ($?) { $newFile = Get-Item $target; $newFile.CreationTime = $file.CreationTime; $newFile.LastWriteTime = $file.LastWriteTime }\n';
-          if (deleteOrig) cmd += '        if ($?) { Remove-Item $file.FullName }\n';
+          
+          const needExif = preserveExif && (imgFormat === "heic" || imgFormat === "avif" || imgFormat === "webp" || imgFormat === "jpg" || imgFormat === "png");
+          cmd += postProcessPs(syncDate, deleteOrig, needExif, '        ');
           cmd += '    }\n';
         }
         
@@ -509,6 +742,7 @@ function generate() {
       }
       
       cmd += 'Write-Host "=== TRAITEMENT TERMINE ===" -ForegroundColor Green\n';
+      cmd += '}\n';
 
     } else if (os === "cmd") {
       badge.textContent = "💾 À sauvegarder dans un fichier .bat et double-cliquer dessus";
@@ -521,26 +755,73 @@ function generate() {
       
       let ffmpegCmd = 'ffmpeg';
       let ffprobeCmd = 'ffprobe';
+      let pythonCmd = 'python';
+      let exifToolCmd = 'exiftool';
       
-      if (customFfmpeg) {
-        ffmpegCmd = '"' + customFfmpeg + '"';
-        ffprobeCmd = '"' + customFfmpeg.replace(/ffmpeg\.exe/i, 'ffprobe.exe') + '"';
-      } else {
-        cmd += 'set "FFMPEG=ffmpeg"\n';
-        cmd += 'set "FFPROBE=ffprobe"\n';
-        cmd += 'where ffmpeg >nul 2>nul\n';
+      // Détection FFmpeg (sauf si HEIC pur)
+      if (hasVid || (hasImg && imgFormat !== "heic")) {
+        if (customFfmpeg) {
+          ffmpegCmd = '"' + customFfmpeg + '"';
+          ffprobeCmd = '"' + customFfmpeg.replace(/ffmpeg\.exe/i, 'ffprobe.exe') + '"';
+        } else {
+          cmd += 'set "FFMPEG=ffmpeg"\n';
+          cmd += 'set "FFPROBE=ffprobe"\n';
+          cmd += 'where ffmpeg >nul 2>nul\n';
+          cmd += 'if %errorlevel% neq 0 (\n';
+          cmd += '    echo [INFO] FFmpeg introuvable. Recherche via Winget...\n';
+          cmd += '    for /f "delims=" %%F in (\'dir /b /s "%LOCALAPPDATA%\\Microsoft\\WinGet\\Packages\\*ffmpeg.exe" 2^>nul\') do set "FFMPEG=%%F"\n';
+          cmd += '    if defined FFMPEG for %%P in ("%FFMPEG%") do set "FFPROBE=%%~dpPffprobe.exe"\n';
+          cmd += ')\n\n';
+          cmd += 'if not defined FFMPEG (\n';
+          cmd += '    echo [ERREUR] FFmpeg introuvable.\n';
+          cmd += '    pause\n';
+          cmd += '    exit /b 1\n';
+          cmd += ')\n\n';
+          ffmpegCmd = '"%FFMPEG%"';
+          ffprobeCmd = '"%FFPROBE%"';
+        }
+      }
+
+      // Détection Python + pillow-heif (REQUIS pour HEIC)
+      if (useHeic) {
+        cmd += 'set "PYTHON=python"\n';
+        cmd += 'where python >nul 2>nul\n';
         cmd += 'if %errorlevel% neq 0 (\n';
-        cmd += '    echo [INFO] FFmpeg introuvable. Recherche via Winget...\n';
-        cmd += '    for /f "delims=" %%F in (\'dir /b /s "%LOCALAPPDATA%\\Microsoft\\WinGet\\Packages\\*ffmpeg.exe" 2^>nul\') do set "FFMPEG=%%F"\n';
-        cmd += '    if defined FFMPEG for %%P in ("%FFMPEG%") do set "FFPROBE=%%~dpPffprobe.exe"\n';
-        cmd += ')\n\n';
-        cmd += 'if not defined FFMPEG (\n';
-        cmd += '    echo [ERREUR] FFmpeg introuvable. Utilisez le Mode Secours.\n';
+        cmd += '    where py >nul 2>nul\n';
+        cmd += '    if %errorlevel% equ 0 set "PYTHON=py"\n';
+        cmd += ')\n';
+        cmd += 'where %PYTHON% >nul 2>nul\n';
+        cmd += 'if %errorlevel% neq 0 (\n';
+        cmd += '    echo [ERREUR] Python introuvable. Requis pour HEIC.\n';
+        cmd += '    echo Telechargez Python sur https://www.python.org/downloads/\n';
+        cmd += '    echo Cochez "Add Python to PATH" lors de l\'installation !\n';
         cmd += '    pause\n';
         cmd += '    exit /b 1\n';
         cmd += ')\n\n';
-        ffmpegCmd = '"%FFMPEG%"';
-        ffprobeCmd = '"%FFPROBE%"';
+        pythonCmd = '"%PYTHON%"';
+      }
+
+      // Détection ExifTool
+      if (preserveExif && hasImg) {
+        cmd += 'set "EXIFTOOL=exiftool"\n';
+        cmd += 'where exiftool >nul 2>nul\n';
+        cmd += 'if %errorlevel% neq 0 (\n';
+        cmd += '    if exist "%LOCALAPPDATA%\\Programs\\ExifTool\\ExifTool.exe" (\n';
+        cmd += '        set "EXIFTOOL=%LOCALAPPDATA%\\Programs\\ExifTool\\ExifTool.exe"\n';
+        cmd += '    ) else if exist "%LOCALAPPDATA%\\Programs\\ExifTool\\exiftool.exe" (\n';
+        cmd += '        set "EXIFTOOL=%LOCALAPPDATA%\\Programs\\ExifTool\\exiftool.exe"\n';
+        cmd += '    ) else if exist "C:\\Program Files\\exiftool\\exiftool.exe" (\n';
+        cmd += '        set "EXIFTOOL=C:\\Program Files\\exiftool\\exiftool.exe"\n';
+        cmd += '    ) else if exist "C:\\Program Files (x86)\\exiftool\\exiftool.exe" (\n';
+        cmd += '        set "EXIFTOOL=C:\\Program Files (x86)\\exiftool\\exiftool.exe"\n';
+        cmd += '    )\n';
+        cmd += ')\n';
+        cmd += 'if not exist "%EXIFTOOL%" (\n';
+        cmd += '    echo [ERREUR] ExifTool introuvable. winget install OliverBetz.ExifTool\n';
+        cmd += '    pause\n';
+        cmd += '    exit /b 1\n';
+        cmd += ')\n\n';
+        exifToolCmd = '"%EXIFTOOL%"';
       }
 
       if (hasVid) {
@@ -555,26 +836,33 @@ function generate() {
           vLoop = 'for %%i in (' + vWildcards + ') do (';
         }
 
-        let vidDel = deleteOrig ? ' && del "%%i"' : '';
         cmd += 'echo === TRAITEMENT DES VIDEOS ===\n';
         cmd += vLoop + '\n';
         
         if (skipH265) {
-          let action = ffmpegCmd + ' ' + skipDest + autorotateFlag + ' -i "%%i" ' + mapMetadata + ' -c:v ' + codec + ' -crf ' + crf + ' -preset ' + preset + ' ' + audio + ' "' + dest + '\\%%~nxi"' + vidDel;
-          // Copie directe sans autorotate
-          let copyAction = ffmpegCmd + ' ' + skipDest + ' -i "%%i" -c copy "' + dest + '\\%%~nxi"' + vidDel;
+          let action = ffmpegCmd + ' ' + skipDest + autorotateFlag + ' -i "%%i" ' + mapMetadata + ' -c:v ' + codec + ' -crf ' + crf + ' -preset ' + preset + ' ' + audio + ' "' + dest + '\\%%~nxi"';
+          let copyAction = ffmpegCmd + ' ' + skipDest + ' -i "%%i" -c copy "' + dest + '\\%%~nxi"';
           
           cmd += '    ' + ffprobeCmd + ' -v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "%%i" | findstr /i "hevc" >nul\n';
           cmd += '    if %errorlevel% equ 0 (\n';
           cmd += '        echo [HEVC Detecte] Copie directe de %%~nxi\n';
           cmd += '        ' + copyAction + '\n';
+          cmd += '        if %errorlevel% equ 0 (\n';
+          if (deleteOrig) cmd += '            del "%%i"\n';
+          cmd += '        )\n';
           cmd += '    ) else (\n';
           cmd += '        echo [ENCODAGE] %%~nxi\n';
           cmd += '        ' + action + '\n';
+          cmd += '        if %errorlevel% equ 0 (\n';
+          if (deleteOrig) cmd += '            del "%%i"\n';
+          cmd += '        )\n';
           cmd += '    )\n';
         } else {
-          let action = ffmpegCmd + ' ' + skipDest + autorotateFlag + ' -i "%%i" ' + mapMetadata + ' -c:v ' + codec + ' -crf ' + crf + ' -preset ' + preset + ' ' + audio + ' "' + dest + '\\%%~nxi"' + vidDel;
+          let action = ffmpegCmd + ' ' + skipDest + autorotateFlag + ' -i "%%i" ' + mapMetadata + ' -c:v ' + codec + ' -crf ' + crf + ' -preset ' + preset + ' ' + audio + ' "' + dest + '\\%%~nxi"';
           cmd += '    ' + action + '\n';
+          cmd += '    if %errorlevel% equ 0 (\n';
+          if (deleteOrig) cmd += '        del "%%i"\n';
+          cmd += '    )\n';
         }
         cmd += ')\n\n';
       }
@@ -594,32 +882,61 @@ function generate() {
           iLoop = 'for %%i in (' + iWildcards + ') do (';
         }
 
-        let imgDel = deleteOrig ? ' && del "%%i"' : '';
         cmd += 'echo === TRAITEMENT DES IMAGES ===\n';
         cmd += iLoop + '\n';
         
         let action = "";
         let extOut = "";
+        let needExif = false;
+        
         if (imgFormat === "avif") {
           extOut = ".avif";
-          // Commande AVIF avec filtre de rotation
+          needExif = true;
           if (avifEncoder === "libsvtav1") {
-            action = ffmpegCmd + ' ' + skipDest + ' -i "%%i" ' + mapMetadata + imgFilter + ' -c:v libsvtav1 -crf ' + avifCrf + ' -preset 6 -pix_fmt yuv420p -color_range pc -colorspace bt709 -color_primaries bt709 -color_trc bt709 "' + dest + '\\%%~ni' + extOut + '"' + imgDel;
+            action = ffmpegCmd + ' ' + skipDest + ' -i "%%i" ' + mapMetadata + imgFilter + ' -c:v libsvtav1 -crf ' + avifCrf + ' -preset 6 -pix_fmt yuv420p -color_range pc -colorspace bt709 -color_primaries bt709 -color_trc bt709 "' + dest + '\\%%~ni' + extOut + '"';
           } else {
-            action = ffmpegCmd + ' ' + skipDest + ' -i "%%i" ' + mapMetadata + imgFilter + ' -c:v libaom-av1 -crf ' + avifCrf + ' -b:v 0 -pix_fmt yuv420p -color_range pc -colorspace bt709 -color_primaries bt709 -color_trc bt709 -still-picture 1 "' + dest + '\\%%~ni' + extOut + '"' + imgDel;
+            action = ffmpegCmd + ' ' + skipDest + ' -i "%%i" ' + mapMetadata + imgFilter + ' -c:v libaom-av1 -crf ' + avifCrf + ' -b:v 0 -pix_fmt yuv420p -color_range pc -colorspace bt709 -color_primaries bt709 -color_trc bt709 -still-picture 1 "' + dest + '\\%%~ni' + extOut + '"';
           }
+        } else if (imgFormat === "heic") {
+          extOut = ".heic";
+          needExif = true;
+          action = pythonCmd + ' -c "import pillow_heif, sys; from PIL import Image; pillow_heif.register_heif_opener(); Image.open(sys.argv[1]).save(sys.argv[2], quality=' + heicQ + ')" "%%i" "' + dest + '\\%%~ni' + extOut + '"';
         } else if (imgFormat === "webp") {
           extOut = ".webp";
-          action = ffmpegCmd + ' ' + skipDest + ' -i "%%i" ' + mapMetadata + imgFilter + ' -c:v libwebp -q:v ' + webpQ + ' "' + dest + '\\%%~ni' + extOut + '"' + imgDel;
+          needExif = true;
+          action = ffmpegCmd + ' ' + skipDest + ' -i "%%i" ' + mapMetadata + imgFilter + ' -c:v libwebp -q:v ' + webpQ + ' "' + dest + '\\%%~ni' + extOut + '"';
+        } else if (imgFormat === "jpg") {
+          extOut = ".jpg";
+          needExif = true;
+          action = ffmpegCmd + ' ' + skipDest + ' -i "%%i" ' + mapMetadata + imgFilter + ' -c:v mjpeg -qscale:v ' + jpgQ + ' "' + dest + '\\%%~ni' + extOut + '"';
+        } else if (imgFormat === "png") {
+          extOut = ".png";
+          needExif = true;
+          action = ffmpegCmd + ' ' + skipDest + ' -i "%%i" ' + mapMetadata + imgFilter + ' -c:v png "' + dest + '\\%%~ni' + extOut + '"';
         } else {
           extOut = "";
-          action = ffmpegCmd + ' ' + skipDest + ' -i "%%i" ' + mapMetadata + imgFilter + ' -qscale:v 5 "' + dest + '\\%%~nxi"' + imgDel;
+          action = ffmpegCmd + ' ' + skipDest + ' -i "%%i" ' + mapMetadata + imgFilter + ' -qscale:v 5 "' + dest + '\\%%~nxi"';
         }
+        
         cmd += '    ' + action + '\n';
+        
+        cmd += '    if %errorlevel% equ 0 (\n';
+        
+        if (preserveExif && needExif) {
+          cmd += '        if exist "' + dest + '\\%%~ni' + extOut + '" (\n';
+          cmd += '            echo [EXIF] Reinjection des metadonnees pour %%~ni' + extOut + '\n';
+          cmd += '            ' + exifToolCmd + ' -overwrite_original -TagsFromFile "%%i" "-all:all>all:all" "' + dest + '\\%%~ni' + extOut + '"\n';
+          cmd += '        )\n';
+        }
+        
+        if (deleteOrig) {
+          cmd += '        del "%%i"\n';
+        }
+        
+        cmd += '    )\n';
         cmd += ')\n\n';
       }
       
-      // Copie des fichiers non sélectionnés - Version corrigée
       if (copyOtherFiles && (hasVid || hasImg)) {
         cmd += 'echo === COPIE DES AUTRES FICHIERS ===\n';
         cmd += 'setlocal enabledelayedexpansion\n';
@@ -655,6 +972,8 @@ function generate() {
       
       let ffmpegCmdStr = customFfmpeg ? '"' + customFfmpeg + '"' : "ffmpeg";
       let ffprobeCmdStr = customFfmpeg ? '"' + customFfmpeg.replace(/ffmpeg/i, 'ffprobe') + '"' : "ffprobe";
+      let pythonCmdStr = "python3";
+      let exifToolCmdStr = "exiftool";
 
       cmd += 'cd "' + path + '"\n';
       cmd += 'mkdir -p "' + dest + '"\n\n';
@@ -662,10 +981,37 @@ function generate() {
       let syncLogic = syncDate ? ' && touch -r "$file" "$target"' : '';
       let delLogic = deleteOrig ? ' && rm "$file"' : '';
 
+      // Détection Python + pillow-heif pour HEIC
+      if (useHeic) {
+        cmd += '# Détection Python et pillow-heif (REQUIS pour HEIC)\n';
+        cmd += 'if ! command -v python3 &>/dev/null; then\n';
+        cmd += '    echo "[ERREUR] python3 introuvable. Requis pour le format HEIC."\n';
+        cmd += '    echo "  Mac:   brew install python"\n';
+        cmd += '    echo "  Linux: sudo apt install python3 python3-pip"\n';
+        cmd += '    exit 1\n';
+        cmd += 'fi\n';
+        cmd += 'if ! python3 -c "import pillow_heif" 2>/dev/null; then\n';
+        cmd += '    echo "[INFO] pillow-heif non installé. Installation..."\n';
+        cmd += '    pip3 install --quiet pillow-heif\n';
+        cmd += '    if [ $? -ne 0 ]; then\n';
+        cmd += '        echo "[ERREUR] Échec de l\'installation. Lancez: pip3 install pillow-heif"\n';
+        cmd += '        exit 1\n';
+        cmd += '    fi\n';
+        cmd += 'fi\n\n';
+      }
+
+      // Détection ExifTool
+      if (preserveExif && hasImg) {
+        cmd += 'if ! command -v exiftool &>/dev/null; then\n';
+        cmd += '    echo "[ERREUR] ExifTool introuvable."\n';
+        cmd += '    echo "  Mac:   brew install exiftool"\n';
+        cmd += '    echo "  Linux: sudo apt install libimage-exiftool-perl"\n';
+        cmd += '    exit 1\n';
+        cmd += 'fi\n\n';
+      }
+
       if (hasVid) {
         const vWild = vidExts.join(',');
-        
-        // Correction : gestion du cas avec une seule extension
         let vWildBash = vidExts.length > 1 ? '*.{' + vWild + '}' : '*.' + vidExts[0];
         
         let bVidLoop;
@@ -680,7 +1026,6 @@ function generate() {
         cmd += 'echo "=== TRAITEMENT DES VIDEOS ==="\n';
         
         if (skipH265) {
-          // Copie directe sans autorotate
           cmd += bVidLoop + '{ target="' + dest + '/$file"; if ' + ffprobeCmdStr + ' -v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "$file" | grep -iq "hevc"; then echo "[HEVC] Copie de $file"; ' + ffmpegCmdStr + ' ' + skipDest + ' -i "$file" -c copy "$target"' + syncLogic + delLogic + '; else echo "[ENCODAGE] $file"; ' + ffmpegCmdStr + ' ' + skipDest + autorotateFlag + ' -i "$file" ' + mapMetadata + ' -c:v ' + codec + ' -crf ' + crf + ' -preset ' + preset + ' ' + audio + ' "$target"' + syncLogic + delLogic + '; fi; }; done\n';
         } else {
           cmd += bVidLoop + '{ target="' + dest + '/$file"; ' + ffmpegCmdStr + ' ' + skipDest + autorotateFlag + ' -i "$file" ' + mapMetadata + ' -c:v ' + codec + ' -crf ' + crf + ' -preset ' + preset + ' ' + audio + ' "$target"' + syncLogic + delLogic + '; }; done\n';
@@ -692,8 +1037,6 @@ function generate() {
         if (iWild.indexOf('jpg') !== -1 && iWild.indexOf('jpeg') === -1) {
           iWild += ',jpeg';
         }
-        
-        // Correction : gestion du cas avec une seule extension
         let iWildBash = imgExts.length > 1 ? '*.{' + iWild + '}' : '*.' + imgExts[0];
         if (imgExts.length === 1 && imgExts[0] === 'jpg') {
           iWildBash = '*.jpg *.jpeg';
@@ -711,17 +1054,28 @@ function generate() {
         cmd += '\necho "=== TRAITEMENT DES IMAGES ==="\n';
         
         if (imgFormat === "avif") {
-          // Commande AVIF avec filtre de rotation
           if (avifEncoder === "libsvtav1") {
-            cmd += bImgLoop + '{ target="' + dest + '/${file%.*}.avif"; ' + ffmpegCmdStr + ' ' + skipDest + ' -i "$file" ' + mapMetadata + imgFilter + ' -c:v libsvtav1 -crf ' + avifCrf + ' -preset 6 -pix_fmt yuv420p -color_range pc -colorspace bt709 -color_primaries bt709 -color_trc bt709 "$target"' + syncLogic + delLogic + '; }; done\n';
+            cmd += bImgLoop + '{ target="' + dest + '/${file%.*}.avif"; ' + ffmpegCmdStr + ' ' + skipDest + ' -i "$file" ' + mapMetadata + imgFilter + ' -c:v libsvtav1 -crf ' + avifCrf + ' -preset 6 -pix_fmt yuv420p -color_range pc -colorspace bt709 -color_primaries bt709 -color_trc bt709 "$target"';
           } else {
-            cmd += bImgLoop + '{ target="' + dest + '/${file%.*}.avif"; ' + ffmpegCmdStr + ' ' + skipDest + ' -i "$file" ' + mapMetadata + imgFilter + ' -c:v libaom-av1 -crf ' + avifCrf + ' -b:v 0 -pix_fmt yuv420p -color_range pc -colorspace bt709 -color_primaries bt709 -color_trc bt709 -still-picture 1 "$target"' + syncLogic + delLogic + '; }; done\n';
+            cmd += bImgLoop + '{ target="' + dest + '/${file%.*}.avif"; ' + ffmpegCmdStr + ' ' + skipDest + ' -i "$file" ' + mapMetadata + imgFilter + ' -c:v libaom-av1 -crf ' + avifCrf + ' -b:v 0 -pix_fmt yuv420p -color_range pc -colorspace bt709 -color_primaries bt709 -color_trc bt709 -still-picture 1 "$target"';
           }
+        } else if (imgFormat === "heic") {
+          cmd += bImgLoop + '{ target="' + dest + '/${file%.*}.heic"; ' + pythonCmdStr + ' -c "import pillow_heif, sys; from PIL import Image; pillow_heif.register_heif_opener(); Image.open(sys.argv[1]).save(sys.argv[2], quality=' + heicQ + ')" "$file" "$target"';
         } else if (imgFormat === "webp") {
-          cmd += bImgLoop + '{ target="' + dest + '/${file%.*}.webp"; ' + ffmpegCmdStr + ' ' + skipDest + ' -i "$file" ' + mapMetadata + imgFilter + ' -c:v libwebp -q:v ' + webpQ + ' "$target"' + syncLogic + delLogic + '; }; done\n';
+          cmd += bImgLoop + '{ target="' + dest + '/${file%.*}.webp"; ' + ffmpegCmdStr + ' ' + skipDest + ' -i "$file" ' + mapMetadata + imgFilter + ' -c:v libwebp -q:v ' + webpQ + ' "$target"';
+        } else if (imgFormat === "jpg") {
+          cmd += bImgLoop + '{ target="' + dest + '/${file%.*}.jpg"; ' + ffmpegCmdStr + ' ' + skipDest + ' -i "$file" ' + mapMetadata + imgFilter + ' -c:v mjpeg -qscale:v ' + jpgQ + ' "$target"';
+        } else if (imgFormat === "png") {
+          cmd += bImgLoop + '{ target="' + dest + '/${file%.*}.png"; ' + ffmpegCmdStr + ' ' + skipDest + ' -i "$file" ' + mapMetadata + imgFilter + ' -c:v png "$target"';
         } else {
-          cmd += bImgLoop + '{ target="' + dest + '/$file"; ' + ffmpegCmdStr + ' ' + skipDest + ' -i "$file" ' + mapMetadata + imgFilter + ' -qscale:v 5 "$target"' + syncLogic + delLogic + '; }; done\n';
+          cmd += bImgLoop + '{ target="' + dest + '/$file"; ' + ffmpegCmdStr + ' ' + skipDest + ' -i "$file" ' + mapMetadata + imgFilter + ' -qscale:v 5 "$target"';
         }
+        
+        if (preserveExif && (imgFormat === "heic" || imgFormat === "avif" || imgFormat === "webp" || imgFormat === "jpg" || imgFormat === "png")) {
+          cmd += ' && [ -f "$target" ] && echo "[EXIF] Réinjection des métadonnées pour $file" && ' + exifToolCmdStr + ' -overwrite_original -TagsFromFile "$file" "-all:all>all:all" "$target"';
+        }
+        
+        cmd += syncLogic + delLogic + '; }; done\n';
       }
       
       if (copyOtherFiles && (hasVid || hasImg)) {
@@ -797,7 +1151,12 @@ function copyCommand() {
 
 document.addEventListener('DOMContentLoaded', function() {
   updateUI();
+  updateHeicTuto();
 });
+
+// Mettre à jour le tuto quand la qualité change
+document.getElementById('imgQuality').addEventListener('change', updateHeicTuto);
+document.getElementById('os').addEventListener('change', updateHeicTuto);
 </script>
 
 </body>
