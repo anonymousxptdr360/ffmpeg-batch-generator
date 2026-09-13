@@ -155,10 +155,12 @@
         <label><input type="checkbox" class="img-ext" value="jpg" checked onchange="generate()"> .JPG/.JPEG</label>
         <label><input type="checkbox" class="img-ext" value="png" checked onchange="generate()"> .PNG</label>
         <label><input type="checkbox" class="img-ext" value="webp" onchange="generate()"> .WebP</label>
+        <label><input type="checkbox" class="img-ext" value="avif" checked onchange="generate()"> .AVIF <span class="fix-badge">NOUVEAU</span></label>
         <label><input type="checkbox" class="img-ext" value="heic" checked onchange="generate()"> .HEIC (iPhone) <span class="fix-badge">NOUVEAU</span></label>
       </div>
       <div class="help-text">
-        <strong>HEIC activé par défaut</strong> : Convertit les photos iPhone. Note : la conversion vers un autre format perd les données "Live Photo" et les calques de profondeur.
+        <strong>HEIC activé par défaut</strong> : Convertit les photos iPhone. Note : la conversion vers un autre format perd les données "Live Photo" et les calques de profondeur.<br>
+        <strong>AVIF activé par défaut</strong> : Convertit les photos déjà compressées en AVIF vers d'autres formats si besoin.
       </div>
     </div>
   </div>
@@ -380,7 +382,9 @@ function updateUI() {
 function updateHeicTuto() {
   const os = document.getElementById('os').value;
   const quality = document.getElementById('imgQuality').value;
-  const heicQ = quality === "20" ? "90" : (quality === "28" ? "80" : "65");
+  const customQ = document.getElementById('customImgQuality').value.trim();
+  const finalQ = customQ !== "" ? customQ : quality;
+  const heicQ = convertCrfToFormat(finalQ, 'heic');
   
   let pyCmd = "python";
   let pythonNote = "Windows PowerShell : `python`";
@@ -1156,6 +1160,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Mettre à jour le tuto quand la qualité change
 document.getElementById('imgQuality').addEventListener('change', updateHeicTuto);
+document.getElementById('customImgQuality').addEventListener('input', updateHeicTuto);
 document.getElementById('os').addEventListener('change', updateHeicTuto);
 </script>
 
