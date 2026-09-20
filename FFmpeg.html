@@ -514,7 +514,9 @@ function generate() {
     let cmd = "";
     const mapMetadata = syncDate ? "-map_metadata 0" : "";
     const autorotateFlag = autorotate ? " -autorotate" : "";
-    const imgFilter = autorotate ? ' -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2"' : '';
+    // CORRECTION : Le filtre scale pour forcer les dimensions paires a été retiré. 
+    // Il n'est pas nécessaire pour les codecs d'image et entrait en conflit avec le filtergraph complexe interne des fichiers HEIC (Tile Grid).
+    const imgFilter = '';
 
     if (os === "ps") {
       badge.textContent = "📟 À coller directement dans le terminal PowerShell";
@@ -692,7 +694,7 @@ function generate() {
             if (avifEncoder === "libsvtav1") {
               cmd += '        & $ffmpegCmd ' + skipDest + ' -i $file.FullName ' + mapMetadata + imgFilter + ' -c:v libsvtav1 -crf ' + avifCrf + ' -preset 6 -pix_fmt yuv420p -color_range pc -colorspace bt709 -color_primaries bt709 -color_trc bt709 $target\n';
             } else {
-              cmd += '        & $ffmpegCmd ' + skipDest + ' -i $file.FullName ' + mapMetadata + imgFilter + ' -c:v libaom-av1 -crf ' + avifCrf + ' -b:v 0 -pix_fmt yuv420p -color_range pc -colorspace bt709 -color_primaries bt709 -color_trc bt709 -still-picture 1 $target\n';
+              cmd += '        & $ffmpegCmd ' + skipDest + ' -i $file.FullName ' + mapMetadata + imgFilter + ' -c:v libaom-av1 -crf ' + avifCrf + ' -b:v 0 -pix_fmt yuv420p -color_range pc -colorspace bt709 -color_primaries bt709 -color_trc bt709 -still_picture 1 $target\n';
             }
           } else if (imgFormat === "heic") {
             cmd += '        $target = "' + dest + '\\$($file.BaseName).heic"\n';
