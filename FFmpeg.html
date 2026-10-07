@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Générateur FFmpeg Ultimate V5.9</title>
+  <title>Générateur FFmpeg Ultimate V6.0</title>
   <style>
     :root {
       --bg-color: #0f172a; --card-bg: #1e293b; --accent: #3b82f6;
@@ -45,6 +45,7 @@
     .python-badge { background: rgba(59, 130, 246, 0.15); color: #60a5fa; padding: 2px 6px; border-radius: 4px; font-size: 0.75em; font-weight: bold; margin-left: 5px; }
     .magick-badge { background: rgba(139, 92, 246, 0.15); color: #a78bfa; padding: 2px 6px; border-radius: 4px; font-size: 0.75em; font-weight: bold; margin-left: 5px; }
     .classic-badge { background: rgba(251, 191, 36, 0.15); color: #fbbf24; padding: 2px 6px; border-radius: 4px; font-size: 0.75em; font-weight: bold; margin-left: 5px; }
+    .screenshot-badge { background: rgba(168, 85, 247, 0.15); color: #c084fc; padding: 2px 6px; border-radius: 4px; font-size: 0.75em; font-weight: bold; margin-left: 5px; }
     
     .custom-quality-row { display: flex; gap: 10px; align-items: center; margin-top: 8px; }
     .custom-quality-row input[type="number"] { flex: 1; padding: 8px 12px; }
@@ -57,12 +58,24 @@
     .tutorial-box ul { margin: 8px 0 12px 0; padding-left: 20px; color: var(--text-muted); font-size: 0.9em; }
     .tutorial-box ul li { margin: 4px 0; }
     .tutorial-box .note { background: rgba(251, 191, 36, 0.1); border-left: 3px solid #fbbf24; padding: 8px 12px; border-radius: 4px; margin-top: 12px; font-size: 0.85em; color: #fcd34d; }
+    
+    /* GitHub */
+    .github-link { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; padding: 10px 16px; background: #24292e; border-radius: 8px; text-decoration: none; color: #fff; font-size: 0.9em; font-weight: 600; transition: background 0.2s; width: fit-content; border: 1px solid #3a3f47; }
+    .github-link:hover { background: #373e47; color: #fff; }
+    .github-link svg { flex-shrink: 0; }
+    .footer-link { text-align: center; margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.85em; }
+    .footer-link a { color: var(--accent); text-decoration: none; }
+    .footer-link a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
 
 <div class="card">
-  <h2>⚡ FFmpeg Ultimate CLI V5.9 <span class="apple-badge">HEIC + EXIF</span></h2>
+  <a href="https://github.com/anonymousxptdr360/ffmpeg-batch-generator" target="_blank" rel="noopener" class="github-link">
+    <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+    <span>GitHub : anonymousxptdr360/ffmpeg-batch-generator</span>
+  </a>
+  <h2>⚡ FFmpeg Ultimate CLI V6.0 <span class="apple-badge">HEIC + EXIF</span> <span class="screenshot-badge">SCREENSHOTS</span></h2>
 
   <div class="section">
     <div class="row">
@@ -322,6 +335,14 @@
         <strong style="color:#fbbf24;">⚠️ Requiert :</strong> <code>winget install OliverBetz.ExifTool</code> puis redémarrer le terminal.</small>
       </label>
     </div>
+    <div class="checkbox-group" style="margin-top: 10px; border-color: rgba(168, 85, 247, 0.3);">
+      <input type="checkbox" id="extractDateFromFilename" checked onchange="generate()">
+      <label for="extractDateFromFilename">
+        📸 Screenshots : Extraire la date du nom de fichier <span class="screenshot-badge">SMART</span><br>
+        <small style="color:var(--text-muted)">Pour les captures d'écran sans <code>DateTimeOriginal</code> dans l'EXIF, extrait la date du nom (ex: <code>Screenshot_20240312_153045.png</code>).<br>
+        <strong style="color:#c084fc;">Fallback :</strong> Si le nom ne contient pas de date, utilise la date de création système (<code>CreationTime</code>) pour qu'Apple Photos les trie correctement.</small>
+      </label>
+    </div>
   </div>
 
   <div class="section">
@@ -342,6 +363,10 @@
     <code id="result">...</code>
     <button id="copyBtn" onclick="copyCommand()">Copier le code</button>
   </div>
+</div>
+
+<div class="footer-link">
+  📦 Projet open-source : <a href="https://github.com/anonymousxptdr360/ffmpeg-batch-generator" target="_blank" rel="noopener">anonymousxptdr360/ffmpeg-batch-generator</a> — Signale les bugs ou propose des améliorations !
 </div>
 
 <script>
@@ -387,11 +412,9 @@ function updateHeicTuto() {
   const heicQ = convertCrfToFormat(finalQ, 'heic');
   
   let pyCmd = "python";
-  let pythonNote = "Windows PowerShell : `python`";
   
   if (os === "bash") {
     pyCmd = "python3";
-    pythonNote = "Linux/Mac : `python3` (et `pip3` au lieu de `pip`)";
   }
   
   const testCmd = `${pyCmd} -c "import pillow_heif, sys; from PIL import Image; pillow_heif.register_heif_opener(); Image.open(sys.argv[1]).save(sys.argv[2], quality=${heicQ})" test.jpg test.heic`;
@@ -409,13 +432,30 @@ function getSelectedExtensions(className) {
 }
 
 // Helper unifié pour post-traitement PowerShell
-function postProcessPs(syncDate, deleteOrig, exifTool = false, indent = '            ') {
+function postProcessPs(syncDate, deleteOrig, exifTool = false, extractDateFromFilename = false, indent = '            ') {
   let block = '';
   block += indent + 'if ($LASTEXITCODE -eq 0 -and (Test-Path -LiteralPath $target)) {\n';
   
   if (exifTool) {
-    block += indent + '    Write-Host "[EXIF] Synchronisation métadonnées : $($file.Name)" -ForegroundColor Yellow\n';
+    block += indent + '    Write-Host "    [EXIF] Copie des métadonnées : $($file.Name)" -ForegroundColor Yellow\n';
     block += indent + '    & $exifToolCmd -overwrite_original -TagsFromFile $file.FullName "-all:all>all:all" $target 2>$null\n';
+    
+    if (extractDateFromFilename) {
+      block += indent + '    # Screenshots : extraire date du nom ou utiliser CreationTime\n';
+      block += indent + '    $dateStr = $null\n';
+      block += indent + '    if ($file.BaseName -match \'(\\d{4})[-_]?(\\d{2})[-_]?(\\d{2})[-_](\\d{2})[-_]?(\\d{2})[-_]?(\\d{2})\') {\n';
+      block += indent + '        $dateStr = "$($matches[1]):$($matches[2]):$($matches[3]) $($matches[4]):$($matches[5]):$($matches[6])"\n';
+      block += indent + '        Write-Host "    [DATE] Extraite du nom: $dateStr" -ForegroundColor Cyan\n';
+      block += indent + '    } elseif ($file.BaseName -match \'(\\d{4})[-_]?(\\d{2})[-_]?(\\d{2})\') {\n';
+      block += indent + '        $dateStr = "$($matches[1]):$($matches[2]):$($matches[3]) 00:00:00"\n';
+      block += indent + '        Write-Host "    [DATE] Extraite du nom (jour): $dateStr" -ForegroundColor Cyan\n';
+      block += indent + '    }\n';
+      block += indent + '    if (-not $dateStr) {\n';
+      block += indent + '        $dateStr = $file.CreationTime.ToString("yyyy:MM:dd HH:mm:ss")\n';
+      block += indent + '        Write-Host "    [DATE] Fallback CreationTime: $dateStr" -ForegroundColor Cyan\n';
+      block += indent + '    }\n';
+      block += indent + '    & $exifToolCmd -overwrite_original -if "not $DateTimeOriginal" "-DateTimeOriginal=$dateStr" $target 2>$null\n';
+    }
   }
   
   if (syncDate) {
@@ -432,24 +472,17 @@ function postProcessPs(syncDate, deleteOrig, exifTool = false, indent = '       
   return block;
 }
 
-// Fonction pour convertir un CRF générique (0-63) vers les valeurs spécifiques de chaque format
 function convertCrfToFormat(crf, format) {
   crf = Math.max(0, Math.min(63, parseInt(crf) || 28));
   
   switch(format) {
     case 'avif':
-      // AVIF utilise directement le CRF (0-63)
       return crf.toString();
     case 'heic':
-      // HEIC utilise une échelle 0-100 (plus haut = meilleure qualité)
-      // CRF 0 -> qualité 100, CRF 63 -> qualité 0
       return Math.round(100 - (crf * 100 / 63)).toString();
     case 'webp':
-      // WebP utilise q:v (0-100, plus haut = meilleure qualité)
       return Math.round(100 - (crf * 100 / 63)).toString();
     case 'jpg':
-      // JPG qscale:v (2-31, plus bas = meilleure qualité)
-      // CRF 0 -> qscale 2, CRF 63 -> qscale 31
       return Math.round(2 + (crf * 29 / 63)).toString();
     default:
       return crf.toString();
@@ -476,6 +509,7 @@ function generate() {
     const copyOtherFiles = document.getElementById('copyOtherFiles').checked;
     const autorotate = document.getElementById('autorotate').checked;
     const preserveExif = document.getElementById('preserveExif').checked;
+    const extractDateFromFilename = document.getElementById('extractDateFromFilename').checked;
 
     const codec = document.getElementById('codec').value;
     const crf = document.getElementById('crf').value;
@@ -487,10 +521,8 @@ function generate() {
     const customImgQuality = document.getElementById('customImgQuality').value.trim();
     const avifEncoder = document.getElementById('avifEncoder').value;
     
-    // Déterminer le CRF final (le champ personnalisé outrepasse le preset)
     const finalCrf = customImgQuality !== "" ? customImgQuality : rawImgQuality;
     
-    // Convertir le CRF générique vers les valeurs spécifiques de chaque format
     const avifCrf = convertCrfToFormat(finalCrf, 'avif');
     const heicQ = convertCrfToFormat(finalCrf, 'heic');
     const webpQ = convertCrfToFormat(finalCrf, 'webp');
@@ -514,8 +546,6 @@ function generate() {
     let cmd = "";
     const mapMetadata = syncDate ? "-map_metadata 0" : "";
     const autorotateFlag = autorotate ? " -autorotate" : "";
-    // CORRECTION : Le filtre scale pour forcer les dimensions paires a été retiré. 
-    // Il n'est pas nécessaire pour les codecs d'image et entrait en conflit avec le filtergraph complexe interne des fichiers HEIC (Tile Grid).
     const imgFilter = '';
 
     if (os === "ps") {
@@ -526,15 +556,21 @@ function generate() {
       cmd += 'Set-Location "' + path + '"\n';
       cmd += 'if (!(Test-Path "' + dest + '")) { New-Item -ItemType Directory -Force -Path "' + dest + '" | Out-Null }\n\n';
 
-      // Détection FFmpeg (sauf si seulement HEIC et pas de vidéo)
       if (!customFfmpeg && (hasVid || (hasImg && imgFormat !== "heic"))) {
-        cmd += '# Détection automatique de FFmpeg\n';
+        cmd += '# Détection automatique de FFmpeg (chemins élargis)\n';
         cmd += '$ffmpegCmd = Get-Command ffmpeg -ErrorAction SilentlyContinue\n';
         cmd += 'if (-not $ffmpegCmd) {\n';
-        cmd += '    Write-Host "[INFO] FFmpeg introuvable dans le PATH. Recherche via Winget..." -ForegroundColor Yellow\n';
+        cmd += '    Write-Host "[INFO] FFmpeg introuvable dans le PATH. Recherche élargie..." -ForegroundColor Yellow\n';
         cmd += '    $wingetPaths = @(\n';
         cmd += '        "$env:LOCALAPPDATA\\Microsoft\\WinGet\\Links\\ffmpeg.exe",\n';
-        cmd += '        "$env:LOCALAPPDATA\\Microsoft\\WinGet\\Packages\\Gyan.FFmpeg_Microsoft\\ffmpeg-*\\bin\\ffmpeg.exe"\n';
+        cmd += '        "$env:LOCALAPPDATA\\Microsoft\\WinGet\\Packages\\Gyan.FFmpeg_Microsoft\\ffmpeg-*\\bin\\ffmpeg.exe",\n';
+        cmd += '        "$env:ProgramData\\chocolatey\\bin\\ffmpeg.exe",\n';
+        cmd += '        "$env:SCOOP\\shims\\ffmpeg.exe",\n';
+        cmd += '        "$env:LOCALAPPDATA\\scoop\\shims\\ffmpeg.exe",\n';
+        cmd += '        "C:\\Program Files\\FFmpeg\\bin\\ffmpeg.exe",\n';
+        cmd += '        "C:\\Program Files (x86)\\FFmpeg\\bin\\ffmpeg.exe",\n';
+        cmd += '        "$env:USERPROFILE\\Downloads\\ffmpeg\\bin\\ffmpeg.exe",\n';
+        cmd += '        "$env:USERPROFILE\\Desktop\\ffmpeg\\bin\\ffmpeg.exe"\n';
         cmd += '    )\n';
         cmd += '    $found = $false\n';
         cmd += '    foreach ($p in $wingetPaths) {\n';
@@ -548,19 +584,34 @@ function generate() {
         cmd += '        $wingetFfmpeg = Get-ChildItem -Path "$env:LOCALAPPDATA\\Microsoft\\WinGet\\Packages" -Filter "ffmpeg.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1\n';
         cmd += '        if ($wingetFfmpeg) {\n';
         cmd += '            $ffmpegCmd = $wingetFfmpeg.FullName\n';
+        cmd += '        } else {\n';
+        cmd += '            $scoopFfmpeg = Get-ChildItem -Path "$env:LOCALAPPDATA\\scoop\\apps" -Filter "ffmpeg.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1\n';
+        cmd += '            if ($scoopFfmpeg) { $ffmpegCmd = $scoopFfmpeg.FullName }\n';
         cmd += '        }\n';
         cmd += '    }\n';
         cmd += '}\n\n';
         cmd += 'if (-not $ffmpegCmd -or -not (Test-Path $ffmpegCmd)) {\n';
-        cmd += '    Write-Host "[ERREUR] FFmpeg introuvable. Installez-le avec: winget install Gyan.FFmpeg" -ForegroundColor Red\n';
+        cmd += '    Write-Host "[ERREUR] FFmpeg introuvable." -ForegroundColor Red\n';
+        cmd += '    Write-Host "Installez-le avec: winget install Gyan.FFmpeg" -ForegroundColor Yellow\n';
+        cmd += '    Write-Host "Ou: choco install ffmpeg / scoop install ffmpeg" -ForegroundColor Yellow\n';
         cmd += '    Write-Host "Puis redémarrez PowerShell ou utilisez le Mode Secours." -ForegroundColor Yellow\n';
         cmd += '    Read-Host "Appuyez sur Entrée pour fermer"\n';
         cmd += '    return\n';
         cmd += '}\n\n';
         if (hasVid) {
+          cmd += '# Détection FFprobe (doit être à côté de ffmpeg.exe)\n';
           cmd += '$ffprobeCmd = $ffmpegCmd -replace "ffmpeg\\.exe$", "ffprobe.exe"\n';
+          cmd += 'if (-not (Test-Path -LiteralPath $ffprobeCmd)) {\n';
+          cmd += '    Write-Host "[ATTENTION] ffprobe.exe introuvable à côté de ffmpeg.exe" -ForegroundColor Yellow\n';
+          cmd += '    Write-Host "La détection H.265 sera désactivée." -ForegroundColor Yellow\n';
+          cmd += '    $ffprobeCmd = $null\n';
+          cmd += '}\n\n';
         }
-        cmd += 'Write-Host "[INFO] FFmpeg trouvé: $ffmpegCmd" -ForegroundColor Green\n\n';
+        cmd += 'Write-Host "[INFO] FFmpeg trouvé: $ffmpegCmd" -ForegroundColor Green\n';
+        if (hasVid) {
+          cmd += 'Write-Host "[INFO] FFprobe: $ffprobeCmd" -ForegroundColor Green\n';
+        }
+        cmd += '\n';
       } else if (customFfmpeg) {
         cmd += '$ffmpegCmd = "' + customFfmpeg + '"\n';
         if (hasVid) {
@@ -569,7 +620,6 @@ function generate() {
         cmd += '\n';
       }
 
-      // Détection Python + pillow-heif (REQUIS pour HEIC)
       if (useHeic) {
         cmd += '# Détection de Python et pillow-heif (REQUIS pour l\'encodage HEIC)\n';
         cmd += '$pythonCmd = Get-Command python -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source\n';
@@ -603,9 +653,8 @@ function generate() {
         cmd += '}\n\n';
       }
 
-      // Détection ExifTool (si requis)
       if (preserveExif && hasImg) {
-        cmd += '# Détection automatique d\'ExifTool (pour les métadonnées EXIF)\n';
+        cmd += '# Détection automatique d\'ExifTool (chemins élargis)\n';
         cmd += '$exifToolCmd = Get-Command exiftool -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source\n';
         cmd += 'if (-not $exifToolCmd) {\n';
         cmd += '    $standardPaths = @(\n';
@@ -614,7 +663,11 @@ function generate() {
         cmd += '        "C:\\Program Files\\exiftool\\exiftool.exe",\n';
         cmd += '        "C:\\Program Files (x86)\\exiftool\\exiftool.exe",\n';
         cmd += '        "$env:LOCALAPPDATA\\Microsoft\\WinGet\\Links\\exiftool.exe",\n';
-        cmd += '        "$env:ProgramData\\chocolatey\\bin\\exiftool.exe"\n';
+        cmd += '        "$env:ProgramData\\chocolatey\\bin\\exiftool.exe",\n';
+        cmd += '        "$env:SCOOP\\shims\\exiftool.exe",\n';
+        cmd += '        "$env:LOCALAPPDATA\\scoop\\shims\\exiftool.exe",\n';
+        cmd += '        "$env:USERPROFILE\\Downloads\\exiftool.exe",\n';
+        cmd += '        "$env:USERPROFILE\\Desktop\\exiftool.exe"\n';
         cmd += '    )\n';
         cmd += '    foreach ($sp in $standardPaths) {\n';
         cmd += '        if (Test-Path -LiteralPath $sp) { $exifToolCmd = $sp; break }\n';
@@ -623,6 +676,7 @@ function generate() {
         cmd += 'if (-not $exifToolCmd -or -not (Test-Path -LiteralPath $exifToolCmd)) {\n';
         cmd += '    Write-Host "[ERREUR] ExifTool introuvable." -ForegroundColor Red\n';
         cmd += '    Write-Host "Installez-le avec: winget install OliverBetz.ExifTool" -ForegroundColor Yellow\n';
+        cmd += '    Write-Host "Ou: choco install exiftool / scoop install exiftool" -ForegroundColor Yellow\n';
         cmd += '    Write-Host "Puis FERMEZ et ROUVREZ PowerShell pour rafraîchir le PATH." -ForegroundColor Yellow\n';
         cmd += '    Read-Host "Appuyez sur Entrée pour fermer"\n';
         cmd += '    return\n';
@@ -630,7 +684,6 @@ function generate() {
         cmd += 'Write-Host "[INFO] ExifTool trouvé: $exifToolCmd" -ForegroundColor Green\n\n';
       }
 
-      // Construction des filtres
       let allFilters = [];
       if (hasVid) allFilters.push(...vidExts.map(ext => '*.' + ext));
       if (hasImg) {
@@ -652,34 +705,35 @@ function generate() {
         cmd += 'foreach ($file in $selectedFiles) {\n';
         cmd += '    $ext = $file.Extension.ToLower()\n';
         
-        // Logique vidéo
         if (hasVid) {
           let vidExtsWithJpeg = [...vidExts];
           cmd += '    # Vidéo\n';
           cmd += '    if (' + vidExtsWithJpeg.map(e => '$ext -eq ".' + e + '"').join(' -or ') + ') {\n';
           
           if (skipH265) {
-            cmd += '        $c = & $ffprobeCmd -v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 $file.FullName\n';
+            cmd += '        $c = $null\n';
+            cmd += '        if ($ffprobeCmd) {\n';
+            cmd += '            $c = & $ffprobeCmd -v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 $file.FullName\n';
+            cmd += '        }\n';
             cmd += '        $target = "' + dest + '\\$($file.Name)"\n';
             cmd += '        if ($c -match "hevc") {\n';
             cmd += '            Write-Host "[HEVC] Copie de $($file.Name)" -ForegroundColor Green\n';
             cmd += '            & $ffmpegCmd ' + skipDest + ' -i $file.FullName -c copy $target\n';
-            cmd += postProcessPs(syncDate, deleteOrig, false, '            ');
+            cmd += postProcessPs(syncDate, deleteOrig, false, false, '            ');
             cmd += '        } else {\n';
             cmd += '            Write-Host "[ENCODAGE] $($file.Name)" -ForegroundColor Yellow\n';
             cmd += '            & $ffmpegCmd ' + skipDest + autorotateFlag + ' -i $file.FullName ' + mapMetadata + ' -c:v ' + codec + ' -crf ' + crf + ' -preset ' + preset + ' ' + audio + ' $target\n';
-            cmd += postProcessPs(syncDate, deleteOrig, false, '            ');
+            cmd += postProcessPs(syncDate, deleteOrig, false, false, '            ');
             cmd += '        }\n';
           } else {
             cmd += '        $target = "' + dest + '\\$($file.Name)"\n';
             cmd += '        Write-Host "[ENCODAGE] $($file.Name)" -ForegroundColor Yellow\n';
             cmd += '        & $ffmpegCmd ' + skipDest + autorotateFlag + ' -i $file.FullName ' + mapMetadata + ' -c:v ' + codec + ' -crf ' + crf + ' -preset ' + preset + ' ' + audio + ' $target\n';
-            cmd += postProcessPs(syncDate, deleteOrig, false, '        ');
+            cmd += postProcessPs(syncDate, deleteOrig, false, false, '        ');
           }
           cmd += '    }\n';
         }
         
-        // Logique image
         if (hasImg) {
           let imgExtsWithJpeg = [...imgExts];
           if (imgExtsWithJpeg.includes('jpg') && !imgExtsWithJpeg.includes('jpeg')) {
@@ -694,7 +748,7 @@ function generate() {
             if (avifEncoder === "libsvtav1") {
               cmd += '        & $ffmpegCmd ' + skipDest + ' -i $file.FullName ' + mapMetadata + imgFilter + ' -c:v libsvtav1 -crf ' + avifCrf + ' -preset 6 -pix_fmt yuv420p -color_range pc -colorspace bt709 -color_primaries bt709 -color_trc bt709 $target\n';
             } else {
-              cmd += '        & $ffmpegCmd ' + skipDest + ' -i $file.FullName ' + mapMetadata + imgFilter + ' -c:v libaom-av1 -crf ' + avifCrf + ' -b:v 0 -pix_fmt yuv420p -color_range pc -colorspace bt709 -color_primaries bt709 -color_trc bt709 -still_picture 1 $target\n';
+              cmd += '        & $ffmpegCmd ' + skipDest + ' -i $file.FullName ' + mapMetadata + imgFilter + ' -c:v libaom-av1 -crf ' + avifCrf + ' -b:v 0 -pix_fmt yuv420p -color_range pc -colorspace bt709 -color_primaries bt709 -color_trc bt709 -still-picture 1 $target\n';
             }
           } else if (imgFormat === "heic") {
             cmd += '        $target = "' + dest + '\\$($file.BaseName).heic"\n';
@@ -719,14 +773,13 @@ function generate() {
           }
           
           const needExif = preserveExif && (imgFormat === "heic" || imgFormat === "avif" || imgFormat === "webp" || imgFormat === "jpg" || imgFormat === "png");
-          cmd += postProcessPs(syncDate, deleteOrig, needExif, '        ');
+          cmd += postProcessPs(syncDate, deleteOrig, needExif, extractDateFromFilename && needExif, '        ');
           cmd += '    }\n';
         }
         
         cmd += '}\n\n';
       }
       
-      // Copie des fichiers non sélectionnés
       if (copyOtherFiles) {
         cmd += '# Copie des fichiers non sélectionnés\n';
         if (allFilters.length > 0) {
@@ -764,7 +817,6 @@ function generate() {
       let pythonCmd = 'python';
       let exifToolCmd = 'exiftool';
       
-      // Détection FFmpeg (sauf si HEIC pur)
       if (hasVid || (hasImg && imgFormat !== "heic")) {
         if (customFfmpeg) {
           ffmpegCmd = '"' + customFfmpeg + '"';
@@ -774,12 +826,18 @@ function generate() {
           cmd += 'set "FFPROBE=ffprobe"\n';
           cmd += 'where ffmpeg >nul 2>nul\n';
           cmd += 'if %errorlevel% neq 0 (\n';
-          cmd += '    echo [INFO] FFmpeg introuvable. Recherche via Winget...\n';
+          cmd += '    echo [INFO] FFmpeg introuvable. Recherche élargie...\n';
           cmd += '    for /f "delims=" %%F in (\'dir /b /s "%LOCALAPPDATA%\\Microsoft\\WinGet\\Packages\\*ffmpeg.exe" 2^>nul\') do set "FFMPEG=%%F"\n';
+          cmd += '    if not defined FFMPEG for /f "delims=" %%F in (\'dir /b /s "%ProgramData%\\chocolatey\\bin\\ffmpeg.exe" 2^>nul\') do set "FFMPEG=%%F"\n';
+          cmd += '    if not defined FFMPEG for /f "delims=" %%F in (\'dir /b /s "%LOCALAPPDATA%\\scoop\\apps\\*ffmpeg.exe" 2^>nul\') do set "FFMPEG=%%F"\n';
+          cmd += '    if not defined FFMPEG (\n';
+          cmd += '        for %%D in ("C:\\Program Files\\FFmpeg\\bin\\ffmpeg.exe" "C:\\Program Files (x86)\\FFmpeg\\bin\\ffmpeg.exe") do if exist %%D set "FFMPEG=%%~D"\n';
+          cmd += '    )\n';
           cmd += '    if defined FFMPEG for %%P in ("%FFMPEG%") do set "FFPROBE=%%~dpPffprobe.exe"\n';
           cmd += ')\n\n';
           cmd += 'if not defined FFMPEG (\n';
           cmd += '    echo [ERREUR] FFmpeg introuvable.\n';
+          cmd += '    echo Installez-le avec: winget install Gyan.FFmpeg\n';
           cmd += '    pause\n';
           cmd += '    exit /b 1\n';
           cmd += ')\n\n';
@@ -788,7 +846,6 @@ function generate() {
         }
       }
 
-      // Détection Python + pillow-heif (REQUIS pour HEIC)
       if (useHeic) {
         cmd += 'set "PYTHON=python"\n';
         cmd += 'where python >nul 2>nul\n';
@@ -807,7 +864,6 @@ function generate() {
         pythonCmd = '"%PYTHON%"';
       }
 
-      // Détection ExifTool
       if (preserveExif && hasImg) {
         cmd += 'set "EXIFTOOL=exiftool"\n';
         cmd += 'where exiftool >nul 2>nul\n';
@@ -820,6 +876,8 @@ function generate() {
         cmd += '        set "EXIFTOOL=C:\\Program Files\\exiftool\\exiftool.exe"\n';
         cmd += '    ) else if exist "C:\\Program Files (x86)\\exiftool\\exiftool.exe" (\n';
         cmd += '        set "EXIFTOOL=C:\\Program Files (x86)\\exiftool\\exiftool.exe"\n';
+        cmd += '    ) else if exist "%ProgramData%\\chocolatey\\bin\\exiftool.exe" (\n';
+        cmd += '        set "EXIFTOOL=%ProgramData%\\chocolatey\\bin\\exiftool.exe"\n';
         cmd += '    )\n';
         cmd += ')\n';
         cmd += 'if not exist "%EXIFTOOL%" (\n';
@@ -932,6 +990,11 @@ function generate() {
           cmd += '        if exist "' + dest + '\\%%~ni' + extOut + '" (\n';
           cmd += '            echo [EXIF] Reinjection des metadonnees pour %%~ni' + extOut + '\n';
           cmd += '            ' + exifToolCmd + ' -overwrite_original -TagsFromFile "%%i" "-all:all>all:all" "' + dest + '\\%%~ni' + extOut + '"\n';
+          if (extractDateFromFilename) {
+            cmd += '            rem Screenshots : essayer date du nom, sinon CreationTime\n';
+            cmd += '            for /f %%D in (\'powershell -NoProfile -Command "$f = Get-Item \'%%i\'; if ($f.BaseName -match \'(\\d{4})[-_]?(\\d{2})[-_]?(\\d{2})[-_](\\d{2})[-_]?(\\d{2})[-_]?(\\d{2})\') { "$($matches[1]):$($matches[2]):$($matches[3]) $($matches[4]):$($matches[5]):$($matches[6])" } elseif ($f.BaseName -match \'(\\d{4})[-_]?(\\d{2})[-_]?(\\d{2})\') { "$($matches[1]):$($matches[2]):$($matches[3]) 00:00:00" } else { $f.CreationTime.ToString(\'yyyy:MM:dd HH:mm:ss\') }"\') do set "DATESTR=%%D"\n';
+            cmd += '            ' + exifToolCmd + ' -overwrite_original -if "not $DateTimeOriginal" "-DateTimeOriginal=!DATESTR!" "' + dest + '\\%%~ni' + extOut + '"\n';
+          }
           cmd += '        )\n';
         }
         
@@ -987,7 +1050,6 @@ function generate() {
       let syncLogic = syncDate ? ' && touch -r "$file" "$target"' : '';
       let delLogic = deleteOrig ? ' && rm "$file"' : '';
 
-      // Détection Python + pillow-heif pour HEIC
       if (useHeic) {
         cmd += '# Détection Python et pillow-heif (REQUIS pour HEIC)\n';
         cmd += 'if ! command -v python3 &>/dev/null; then\n';
@@ -1006,7 +1068,6 @@ function generate() {
         cmd += 'fi\n\n';
       }
 
-      // Détection ExifTool
       if (preserveExif && hasImg) {
         cmd += 'if ! command -v exiftool &>/dev/null; then\n';
         cmd += '    echo "[ERREUR] ExifTool introuvable."\n';
@@ -1079,6 +1140,21 @@ function generate() {
         
         if (preserveExif && (imgFormat === "heic" || imgFormat === "avif" || imgFormat === "webp" || imgFormat === "jpg" || imgFormat === "png")) {
           cmd += ' && [ -f "$target" ] && echo "[EXIF] Réinjection des métadonnées pour $file" && ' + exifToolCmdStr + ' -overwrite_original -TagsFromFile "$file" "-all:all>all:all" "$target"';
+          if (extractDateFromFilename) {
+            cmd += ' && if [ -f "$target" ]; then';
+            cmd += ' DATESTR=""';
+            cmd += ' if [[ "${file%.*}" =~ ([0-9]{4})[-_]?([0-9]{2})[-_]?([0-9]{2})[-_]([0-9]{2})[-_]?([0-9]{2})[-_]?([0-9]{2}) ]]; then';
+            cmd += ' DATESTR="${BASH_REMATCH[1]}:${BASH_REMATCH[2]}:${BASH_REMATCH[3]} ${BASH_REMATCH[4]}:${BASH_REMATCH[5]}:${BASH_REMATCH[6]}"';
+            cmd += ' elif [[ "${file%.*}" =~ ([0-9]{4})[-_]?([0-9]{2})[-_]?([0-9]{2}) ]]; then';
+            cmd += ' DATESTR="${BASH_REMATCH[1]}:${BASH_REMATCH[2]}:${BASH_REMATCH[3]} 00:00:00"';
+            cmd += ' fi';
+            cmd += ' if [ -z "$DATESTR" ]; then';
+            cmd += ' DATESTR=$(stat -c %y "$file" 2>/dev/null | cut -d. -f1 | tr "T" " " | sed "s/-/:/;s/-/:/")';
+            cmd += ' [ -z "$DATESTR" ] && DATESTR=$(stat -f "%SB" -t "%Y:%m:%d %H:%M:%S" "$file" 2>/dev/null)';
+            cmd += ' fi';
+            cmd += ' [ -n "$DATESTR" ] && echo "[DATE] $DATESTR" && ' + exifToolCmdStr + ' -overwrite_original -if "not $DateTimeOriginal" "-DateTimeOriginal=$DATESTR" "$target"';
+            cmd += '; fi';
+          }
         }
         
         cmd += syncLogic + delLogic + '; }; done\n';
@@ -1160,7 +1236,6 @@ document.addEventListener('DOMContentLoaded', function() {
   updateHeicTuto();
 });
 
-// Mettre à jour le tuto quand la qualité change
 document.getElementById('imgQuality').addEventListener('change', updateHeicTuto);
 document.getElementById('customImgQuality').addEventListener('input', updateHeicTuto);
 document.getElementById('os').addEventListener('change', updateHeicTuto);
