@@ -1,152 +1,162 @@
-# ⚡ FFmpeg Batch Command Generator
+# ⚡ FFmpeg Ultimate CLI Generator
 
-A simple, zero-dependency HTML utility that generates custom, single-line FFmpeg commands to batch compress and convert video folders across Windows, macOS, and Linux.
-
----
-
-## 📖 About
-
-**Born from a quick fix.** I built this lightweight tool to stop manually editing terminal scripts for batch video compression. Open it in your browser, tweak your FFmpeg settings (paths, codecs, CRF, presets), and copy a ready-to-run command. No installation, no extra software.
+Un outil web ultra-léger, zéro dépendance et 100 % local pour générer des scripts d'encodage et de compression en masse (vidéos et images) sous Windows, macOS et Linux.
 
 ---
 
-## ✨ Features
+## 📖 À propos
 
-- 💻 **Cross-Platform:** Supports Windows (CMD & PowerShell) and macOS/Linux (Bash/Zsh).
-- ⚙️ **Fully Customizable:** Choose video codec (H.264 / H.265), CRF value, preset, audio codec, bitrate, output folder, and more.
-- 📋 **One-Click Copy:** Instantly copy the generated command to your clipboard.
-- 🔒 **100% Local & Private:** Everything runs directly in your browser. No files, paths, or data are uploaded.
-- 🚀 **Zero Dependencies:** A single HTML file with no installation, frameworks, or build tools required.
+**FFmpeg Ultimate CLI Generator** permet d'automatiser la compression et la conversion de dossiers entiers de photos et vidéos sans aucune ligne de commande à taper manuellement. 
+
+Ouvrez le fichier HTML dans votre navigateur, configurez vos préférences (codecs, sous-dossiers, qualité, préservation EXIF) et copiez-collez le script généré directement dans votre terminal (PowerShell, .bat ou Bash).
 
 ---
 
-## ⚙️ Prerequisites
+## ✨ Fonctionnalités (3.5)
 
-The generated commands require **FFmpeg** to be installed and accessible from your terminal.
+- 💻 **Cross-Platform :** Génère des scripts natifs pour **Windows (PowerShell 5.1/7+ & .BAT)** et **macOS/Linux (Bash/Zsh)**.
+- 🎬 **Codecs Vidéo Modernes :** Support complet de **AV1 (SVT-AV1)**, **H.265 / HEVC** et **H.264**, avec gestion fine du CRF, des presets de vitesse, du 8/10-bit (HDR) et du re-muxing intelligent (`.mkv`, `.mp4`).
+- 📸 **Conversion Images & Photos :** Conversion intelligente vers **AVIF**, **HEIC** (iPhone), **WebP**, **JPG** et **PNG**.
+- 📂 **Gestion des Sous-Dossiers :** 3 modes au choix (ignorer, reproduire la même arborescence, ou tout regrouper à plat avec gestion automatique des doublons de noms).
+- ⏱️ **Estimation Intelligente par Benchmark :** Exécute un mini-benchmark réel de 3 secondes sur votre machine au démarrage pour calculer un temps restant précis, ajusté après chaque fichier.
+- 🍎 **Compatibilité Apple Photos & EXIF :**
+  - Copie intégrale des métadonnées EXIF (GPS, date de prise de vue) via **ExifTool**.
+  - **Correction des captures d'écran :** Extraction de la date depuis le nom de fichier (`Screenshot_YYYYMMDD...`) pour réinjection dans le tag `DateTimeOriginal`.
+  - **Rotation automatique :** Application des filtres de rotation EXIF pour éviter les photos inversées.
+- 🐍 **Fallback Python + pillow-heif :** Intégration automatique de Python pour lire et encoder le format **HEIC** même si votre version de FFmpeg ne le supporte pas nativement.
+- 🛡️ **Sécurité & Résilience :**
+  - **Reprise après interruption :** Détecte et saute les fichiers déjà traités.
+  - **Anti-boucle infinie :** Exclut automatiquement le dossier de destination s'il est situé dans la source.
+  - **Option de secours :** Copie l'original tel quel si un fichier est corrompu ou illisible afin d'éviter toute perte dans votre galerie.
+- 🔒 **100 % Local & Privé :** Fonctionne à 100 % dans votre navigateur. Aucune donnée, aucun chemin et aucun fichier ne quittent votre ordinateur.
 
-### Windows
+---
 
-Open **Command Prompt** or **PowerShell** and install FFmpeg using Winget:
+## ⚙️ Prérequis
 
+Pour exécuter les scripts générés, les outils suivants doivent être installés sur votre système (détectés automatiquement par le script s'ils sont dans le PATH).
+
+### 1. FFmpeg (Indispensable)
+
+#### Windows
+Ouvrez PowerShell et installez la version complète via Winget :
 ```cmd
 winget install Gyan.FFmpeg
+
 ```
 
-If FFmpeg is already installed, update it with:
+*(Pensez à redémarrer PowerShell après l'installation).*
 
-```cmd
-winget upgrade Gyan.FFmpeg
-```
+#### macOS
 
-> **Note:** If `winget` is not recognized, install **App Installer** from the Microsoft Store:
->
-> https://apps.microsoft.com/detail/9nblggh4nns1?hl=fr-FR&gl=FR
-
-### macOS
-
-Using Homebrew:
+Via Homebrew :
 
 ```bash
 brew install ffmpeg
+
 ```
 
-### Linux
-
-Ubuntu / Debian:
+#### Linux
 
 ```bash
-sudo apt update
-sudo apt install ffmpeg
-```
+# Ubuntu / Debian
+sudo apt update && sudo apt install ffmpeg
 
-Fedora:
-
-```bash
+# Fedora
 sudo dnf install ffmpeg
-```
 
-Arch Linux:
-
-```bash
+# Arch Linux
 sudo pacman -S ffmpeg
+
 ```
 
 ---
 
-## 🚀 How to Use
+### 2. ExifTool (Recommandé pour conserver les dates & GPS des photos)
 
-1. Clone or download this repository.
+#### Windows
 
+```cmd
+winget install OliverBetz.ExifTool
+
+```
+
+#### macOS
+
+```bash
+brew install exiftool
+
+```
+
+#### Linux (Ubuntu/Debian)
+
+```bash
+sudo apt install libimage-exiftool-perl
+
+```
+
+---
+
+### 3. Python + pillow-heif (Uniquement pour le format HEIC / Photos iPhone)
+
+Si vous traitez des photos HEIC et que votre version de FFmpeg est inférieure à 7.1, installez la bibliothèque Python suivante :
+
+```bash
+pip install pillow-heif
+
+```
+
+*(Le script PowerShell/Bash tentera une installation automatique via `pip` s'il détecte Python sur votre machine).*
+
+---
+
+## 🚀 Utilisation
+
+1. **Récupérez le projet :**
 ```bash
 git clone https://github.com/anonymousxptdr360/ffmpeg-batch-generator.git
 ```
 
-Or download it as a ZIP from GitHub.
 
-2. Open `index.html` in your favorite web browser.
+*(ou téléchargez simplement le fichier `index.html` depuis la page des Releases).*
+2. **Ouvrez `index.html**` dans n'importe quel navigateur web.
+3. **Indiquez les chemins :**
+* Dossier source *(ex: `C:\Users\Nom\Pictures\Photos`)*
+* Dossier de destination *(ex: `D:\Compresses`)*
 
-3. Enter the path to your video folder.
 
-Example:
+4. **Ajustez vos réglages :** Choisissez le format cible (AV1, HEIC, AVIF...), la qualité (CRF) et le mode de sous-dossiers.
+5. **Lancez le script :**
+* **Bouton Copier :** Collez le code directement dans votre terminal.
+* **Bouton Télécharger :** Téléchargez le fichier (`.ps1`, `.bat` ou `.sh`) et exécutez-le.
 
-**Windows**
 
-```text
-C:\Users\YourName\Desktop\Videos
-```
-
-**macOS / Linux**
-
-```text
-/home/username/Videos
-```
-
-4. Select your preferred encoding settings.
-
-5. Click **Copy Command**.
-
-6. Paste the generated command into your terminal and run it.
 
 ---
 
-## 📂 Generated Commands
+## 🔒 Confidentialité & Sécurité
 
-The tool generates optimized batch commands that can:
+Ce générateur est une application statique exécutée côté client :
 
-- Compress entire folders
-- Convert video codecs
-- Preserve or re-encode audio
-- Keep the original folder untouched
-- Create converted files in a new output directory
-
-No scripting knowledge required.
+* ❌ Aucun serveur backend
+* ❌ Aucun cookie ni traqueur
+* ❌ Aucune télémétrie
+* ✅ Fonctionne entièrement hors-ligne
 
 ---
 
-## 🔒 Privacy
+## 📄 Licence
 
-This tool works entirely offline.
+Ce projet est sous licence **MIT**.
 
-- No analytics
-- No tracking
-- No network requests
-- No server
-- No data collection
+Vous êtes totalement libre de l'utiliser, le modifier, le distribuer, l'intégrer dans des projets privés ou commerciaux, **à la seule condition d'inclure la notice de copyright d'origine et de créditer l'auteur (`anonymousxptdr360`)**.
 
-Everything happens locally in your browser.
+Voir le fichier `LICENSE` pour plus de détails.
 
 ---
 
-## 📄 License
+## 📦 Dépôt GitHub
 
-This project is licensed under the **MIT License**.
+Projet hébergé sur :
 
-See the LICENSE file for details.
-
----
-
-## ⭐ Repository
-
-GitHub:
-
-https://github.com/anonymousxptdr360/ffmpeg-batch-generator
+👉 [https://github.com/anonymousxptdr360/ffmpeg-batch-generator](https://github.com/anonymousxptdr360/ffmpeg-batch-generator)
