@@ -159,4 +159,4 @@ Voir le fichier `LICENSE` pour plus de détails.
 
 Projet hébergé sur :
 
-👉 [https://github.com/anonymousxptdr360/ffmpeg-batch-generator](https://github.com/anonymousxptdr360/ffmpeg-batch-generator)
+👉 https://anonymousxptdr360.github.io/ffmpeg-batch-generator/FFmpeg.html
